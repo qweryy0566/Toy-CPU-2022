@@ -1,6 +1,6 @@
 `include "config.v" 
 
-module inst_fetch (
+module InstFetch (
   input wire          clk,
   input wire          rst,
   input wire					rdy,
@@ -13,6 +13,7 @@ module inst_fetch (
 
   output reg         inst_send_enable,
   output reg [31:0]  inst_to_dec, 
+  output reg [31:0]  pc_to_dec,
 
   input wire         jump_flag,
   input wire [31:0]  target_pc
@@ -36,11 +37,13 @@ module inst_fetch (
       isBusy <= `FALSE;
       pc_send_enable <= `LOW;
       inst_send_enable <= `LOW;
+    // TODO : stall when full
     end else begin
       if (isBusy) begin
         if (inst_get_ready) begin
           inst_send_enable <= `HIGH;
           inst_to_dec <= inst_from_ic;
+          pc_to_dec <= pc;
           isBusy <= `FALSE;
           pc <= pc + 3'b100;
           pc_send_enable <= `LOW;

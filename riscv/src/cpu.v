@@ -1,3 +1,5 @@
+`include "config.v"
+
 // RISCV32I CPU top module
 // port modification allowed for debugging purposes
 
@@ -28,19 +30,68 @@ module cpu(
 // - 0x30004 read: read clocks passed since cpu starts (in dword, 4 bytes)
 // - 0x30004 write: indicates program stop (will output '\0' through uart tx)
 
-always @(posedge clk_in)
-  begin
-    if (rst_in)
-      begin
-      
-      end
-    else if (!rdy_in)
-      begin
-      
-      end
-    else
-      begin
-      
-      end
+  wire           ic_to_mem_valid;
+  wire [31:0]    ic_to_mem_addr;
+  wire           mem_to_ic_valid;
+  wire [31:0]    mem_to_ic_inst;
+  wire           if_to_ic_valid;
+  wire [31:0]    if_to_ic_pc;
+  wire           ic_to_if_valid;
+  wire [31:0]    ic_to_if_inst;
+  wire           if_to_id_valid;
+  wire [31:0]    if_to_id_inst;
+  wire [31:0]    if_to_id_pc;
+
+  wire           rob_to_if_valid;
+  wire [31:0]    rob_to_if_pc;
+
+
+  initial begin
+    $dumpfile("test.vcd");
+    $dumpvars;
   end
+
+  MemCtrl mem_ctrl(
+    .clk(clk_in),
+    .rst(rst_in),
+    .rdy(rdy_in),
+    .mem_din(mem_din),
+    .mem_dout(mem_dout),
+    .mem_a(mem_a),
+    .mem_wr(mem_wr),
+    .io_buffer_full(io_buffer_full),
+    .ic_valid(ic_to_mem_valid),
+    .addr_from_ic(ic_to_mem_addr),
+    .ic_enable(mem_to_ic_valid),
+    .inst_to_ic(mem_to_ic_inst)
+  );
+
+  ICache icache(
+    .clk(clk_in),
+    .rst(rst_in),
+    .rdy(rdy_in),
+    .if_valid(if_to_ic_valid),
+    .pc_from_if(if_to_ic_pc),
+    .inst_enable(ic_to_if_valid),
+    .inst_to_if(ic_to_if_inst),
+    .addr_enable(ic_to_mem_valid),
+    .addr_to_mem(ic_to_mem_addr),
+    .mem_valid(mem_to_ic_valid),
+    .inst_from_mem(mem_to_ic_inst)
+  );
+
+  InstFetch if_stage(
+    .clk(clk_in),
+    .rst(rst_in),
+    .rdy(rdy_in),
+    .pc_send_enable(if_to_ic_valid),
+    .pc_to_ic(if_to_ic_pc),
+    .inst_get_ready(ic_to_if_valid),
+    .inst_from_ic(ic_to_if_inst),
+    .inst_send_enable(if_to_id_valid),
+    .inst_to_dec(if_to_id_inst),
+    .pc_to_dec(if_to_id_pc),
+    .jump_flag(rob_to_if_valid),
+    .target_pc(rob_to_if_pc)
+  );
 endmodule

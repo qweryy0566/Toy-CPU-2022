@@ -18,3 +18,5 @@ ${rpath}riscv32-unknown-elf-objcopy -O verilog ./test/test.om ./test/test.data
 ${rpath}riscv32-unknown-elf-objcopy -O binary ./test/test.om ./test/test.bin
 # decompile (for debugging)
 ${rpath}riscv32-unknown-elf-objdump -D ./test/test.om > ./test/test.dump
+
+
