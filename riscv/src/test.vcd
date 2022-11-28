@@ -1,5 +1,5 @@
 $date
-	Mon Nov 14 22:03:58 2022
+	Mon Nov 28 16:16:51 2022
 $end
 $version
 	Icarus Verilog
@@ -7,551 +7,560 @@ $end
 $timescale
 	1s
 $end
+$scope module ICache $end
+$var wire 1 ! clk $end
+$var wire 1 " hit $end
+$var wire 1 # if_valid $end
+$var wire 32 $ inst_from_mem [31:0] $end
+$var wire 1 % mem_valid $end
+$var wire 32 & pc_from_if [31:0] $end
+$var wire 1 ' rdy $end
+$var wire 1 ( rst $end
+$var reg 1 ) addr_enable $end
+$var reg 32 * addr_to_mem [31:0] $end
+$var reg 1 + inst_enable $end
+$var reg 32 , inst_to_if [31:0] $end
+$var reg 1 - isBusy $end
+$var integer 32 . i [31:0] $end
+$upscope $end
+$scope module InstDecode $end
+$var wire 1 / clk $end
+$var wire 32 0 inst_from_if [31:0] $end
+$var wire 1 1 inst_valid $end
+$var wire 32 2 pc_from_if [31:0] $end
+$var wire 1 3 rdy $end
+$var wire 1 4 rst $end
+$upscope $end
+$scope module InstFetch $end
+$var wire 1 5 clk $end
+$var wire 32 6 inst_from_ic [31:0] $end
+$var wire 1 7 inst_get_ready $end
+$var wire 1 8 jump_flag $end
+$var wire 1 9 rdy $end
+$var wire 1 : rst $end
+$var wire 32 ; target_pc [31:0] $end
+$var reg 1 < inst_send_enable $end
+$var reg 32 = inst_to_dec [31:0] $end
+$var reg 1 > isBusy $end
+$var reg 32 ? pc [31:0] $end
+$var reg 1 @ pc_send_enable $end
+$var reg 32 A pc_to_dec [31:0] $end
+$var reg 32 B pc_to_ic [31:0] $end
+$upscope $end
+$scope module MemCtrl $end
+$var wire 32 C addr_from_ic [31:0] $end
+$var wire 1 D clk $end
+$var wire 1 E ic_valid $end
+$var wire 1 F io_buffer_full $end
+$var wire 8 G mem_din [7:0] $end
+$var wire 1 H rdy $end
+$var wire 1 I rst $end
+$var reg 1 J ic_enable $end
+$var reg 32 K inst_to_ic [31:0] $end
+$var reg 32 L mem_a [31:0] $end
+$var reg 8 M mem_dout [7:0] $end
+$var reg 1 N mem_wr $end
+$var reg 3 O state [2:0] $end
+$upscope $end
 $scope module dual_port_ram_sync $end
-$var wire 6 ! addr_a [5:0] $end
-$var wire 6 " addr_b [5:0] $end
-$var wire 1 # clk $end
-$var wire 8 $ din_a [7:0] $end
-$var wire 8 % dout_a [7:0] $end
-$var wire 8 & dout_b [7:0] $end
-$var wire 1 ' we $end
-$var reg 6 ( q_addr_a [5:0] $end
-$var reg 6 ) q_addr_b [5:0] $end
+$var wire 6 P addr_a [5:0] $end
+$var wire 6 Q addr_b [5:0] $end
+$var wire 1 R clk $end
+$var wire 8 S din_a [7:0] $end
+$var wire 8 T dout_a [7:0] $end
+$var wire 8 U dout_b [7:0] $end
+$var wire 1 V we $end
+$var reg 6 W q_addr_a [5:0] $end
+$var reg 6 X q_addr_b [5:0] $end
 $upscope $end
 $scope module riscv_top $end
-$var wire 1 * EXCLK $end
-$var wire 1 + Rx $end
-$var wire 1 , btnC $end
-$var wire 1 - clk $end
-$var wire 32 . cpu_dbgreg_dout [31:0] $end
-$var wire 8 / hci_io_din [7:0] $end
-$var wire 1 0 hci_io_wr $end
-$var wire 8 1 hci_ram_din [7:0] $end
-$var wire 1 2 led $end
-$var wire 1 3 ram_en $end
-$var wire 8 4 ram_dout [7:0] $end
-$var wire 17 5 ram_a [16:0] $end
-$var wire 1 6 program_finish $end
-$var wire 1 7 hci_ram_wr $end
-$var wire 8 8 hci_ram_dout [7:0] $end
-$var wire 17 9 hci_ram_a [16:0] $end
-$var wire 3 : hci_io_sel [2:0] $end
-$var wire 1 ; hci_io_full $end
-$var wire 1 < hci_io_en $end
-$var wire 8 = hci_io_dout [7:0] $end
-$var wire 1 > hci_active_out $end
-$var wire 1 ? hci_active $end
-$var wire 1 @ cpumc_wr $end
-$var wire 8 A cpumc_din [7:0] $end
-$var wire 32 B cpumc_a [31:0] $end
-$var wire 1 C cpu_rdy $end
-$var wire 1 D cpu_ram_wr $end
-$var wire 8 E cpu_ram_dout [7:0] $end
-$var wire 8 F cpu_ram_din [7:0] $end
-$var wire 32 G cpu_ram_a [31:0] $end
-$var wire 1 H Tx $end
-$var reg 1 I q_hci_io_en $end
-$var reg 1 J rst $end
-$var reg 1 K rst_delay $end
+$var wire 1 Y EXCLK $end
+$var wire 1 Z Rx $end
+$var wire 1 [ btnC $end
+$var wire 1 \ clk $end
+$var wire 32 ] cpu_dbgreg_dout [31:0] $end
+$var wire 32 ^ cpu_ram_a [31:0] $end
+$var wire 8 _ cpu_ram_dout [7:0] $end
+$var wire 1 ` cpu_ram_wr $end
+$var wire 8 a hci_io_din [7:0] $end
+$var wire 1 b hci_io_wr $end
+$var wire 8 c hci_ram_din [7:0] $end
+$var wire 1 d led $end
+$var wire 1 e ram_en $end
+$var wire 8 f ram_dout [7:0] $end
+$var wire 17 g ram_a [16:0] $end
+$var wire 1 h program_finish $end
+$var wire 1 i hci_ram_wr $end
+$var wire 8 j hci_ram_dout [7:0] $end
+$var wire 17 k hci_ram_a [16:0] $end
+$var wire 3 l hci_io_sel [2:0] $end
+$var wire 1 m hci_io_full $end
+$var wire 1 n hci_io_en $end
+$var wire 8 o hci_io_dout [7:0] $end
+$var wire 1 p hci_active_out $end
+$var wire 1 q hci_active $end
+$var wire 1 r cpumc_wr $end
+$var wire 8 s cpumc_din [7:0] $end
+$var wire 32 t cpumc_a [31:0] $end
+$var wire 1 u cpu_rdy $end
+$var wire 8 v cpu_ram_din [7:0] $end
+$var wire 1 w Tx $end
+$var reg 1 x q_hci_io_en $end
+$var reg 1 y rst $end
+$var reg 1 z rst_delay $end
 $scope module cpu0 $end
-$var wire 1 - clk_in $end
-$var wire 32 L dbgreg_dout [31:0] $end
-$var wire 8 M mem_din [7:0] $end
-$var wire 1 C rdy_in $end
-$var wire 32 N rob_to_if_pc [31:0] $end
-$var wire 1 O rob_to_if_valid $end
-$var wire 1 P rst_in $end
-$var wire 1 D mem_wr $end
-$var wire 1 Q mem_to_ic_valid $end
-$var wire 32 R mem_to_ic_inst [31:0] $end
-$var wire 8 S mem_dout [7:0] $end
-$var wire 32 T mem_a [31:0] $end
-$var wire 1 ; io_buffer_full $end
-$var wire 1 U if_to_id_valid $end
-$var wire 32 V if_to_id_pc [31:0] $end
-$var wire 32 W if_to_id_inst [31:0] $end
-$var wire 1 X if_to_ic_valid $end
-$var wire 32 Y if_to_ic_pc [31:0] $end
-$var wire 1 Z ic_to_mem_valid $end
-$var wire 32 [ ic_to_mem_addr [31:0] $end
-$var wire 1 \ ic_to_if_valid $end
-$var wire 32 ] ic_to_if_inst [31:0] $end
-$scope module icache $end
-$var wire 1 - clk $end
-$var wire 1 ^ hit $end
-$var wire 1 C rdy $end
-$var wire 1 P rst $end
-$var wire 32 _ pc_from_if [31:0] $end
-$var wire 1 Q mem_valid $end
-$var wire 32 ` inst_from_mem [31:0] $end
-$var wire 1 X if_valid $end
-$var reg 1 Z addr_enable $end
-$var reg 32 a addr_to_mem [31:0] $end
-$var reg 1 \ inst_enable $end
-$var reg 32 b inst_to_if [31:0] $end
-$var reg 1 c isBusy $end
-$var integer 32 d i [31:0] $end
-$upscope $end
-$scope module if_stage $end
-$var wire 1 - clk $end
-$var wire 32 e inst_from_ic [31:0] $end
-$var wire 1 \ inst_get_ready $end
-$var wire 1 O jump_flag $end
-$var wire 1 C rdy $end
-$var wire 1 P rst $end
-$var wire 32 f target_pc [31:0] $end
-$var reg 1 U inst_send_enable $end
-$var reg 32 g inst_to_dec [31:0] $end
-$var reg 1 h isBusy $end
-$var reg 32 i pc [31:0] $end
-$var reg 1 X pc_send_enable $end
-$var reg 32 j pc_to_dec [31:0] $end
-$var reg 32 k pc_to_ic [31:0] $end
-$upscope $end
-$scope module mem_ctrl $end
-$var wire 32 l addr_from_ic [31:0] $end
-$var wire 1 - clk $end
-$var wire 1 Z ic_valid $end
-$var wire 8 m mem_din [7:0] $end
-$var wire 1 C rdy $end
-$var wire 1 P rst $end
-$var wire 1 ; io_buffer_full $end
-$var reg 1 Q ic_enable $end
-$var reg 32 n inst_to_ic [31:0] $end
-$var reg 32 o mem_a [31:0] $end
-$var reg 8 p mem_dout [7:0] $end
-$var reg 1 D mem_wr $end
-$var reg 3 q state [2:0] $end
-$upscope $end
+$var wire 1 \ clk_in $end
+$var wire 32 { dbgreg_dout [31:0] $end
+$var wire 32 | mem_a [31:0] $end
+$var wire 8 } mem_din [7:0] $end
+$var wire 8 ~ mem_dout [7:0] $end
+$var wire 1 ` mem_wr $end
+$var wire 1 u rdy_in $end
+$var wire 1 !" rst_in $end
+$var wire 1 m io_buffer_full $end
 $upscope $end
 $scope module hci0 $end
-$var wire 1 - clk $end
-$var wire 32 r cpu_dbgreg_din [31:0] $end
-$var wire 8 s io_din [7:0] $end
-$var wire 1 < io_en $end
-$var wire 1 ; io_full $end
-$var wire 3 t io_sel [2:0] $end
-$var wire 1 0 io_wr $end
-$var wire 17 u ram_a [16:0] $end
-$var wire 8 v ram_din [7:0] $end
-$var wire 8 w ram_dout [7:0] $end
-$var wire 1 J rst $end
-$var wire 1 + rx $end
-$var wire 1 x tx_full $end
-$var wire 1 H tx $end
-$var wire 1 y rx_empty $end
-$var wire 8 z rd_data [7:0] $end
-$var wire 1 { parity_err $end
-$var wire 8 | io_in_rd_data [7:0] $end
-$var wire 1 } io_in_full $end
-$var wire 1 ~ io_in_empty $end
-$var wire 8 !" io_dout [7:0] $end
-$var wire 32 "" d_cpu_cycle_cnt [31:0] $end
-$var wire 1 > active $end
-$var reg 17 #" d_addr [16:0] $end
-$var reg 3 $" d_decode_cnt [2:0] $end
-$var reg 2 %" d_err_code [1:0] $end
-$var reg 17 &" d_execute_cnt [16:0] $end
-$var reg 8 '" d_io_dout [7:0] $end
-$var reg 8 (" d_io_in_wr_data [7:0] $end
-$var reg 1 )" d_io_in_wr_en $end
-$var reg 1 *" d_program_finish $end
-$var reg 5 +" d_state [4:0] $end
-$var reg 8 ," d_tx_data [7:0] $end
-$var reg 1 -" d_wr_en $end
-$var reg 1 ." io_in_rd_en $end
-$var reg 1 6 program_finish $end
-$var reg 17 /" q_addr [16:0] $end
-$var reg 32 0" q_cpu_cycle_cnt [31:0] $end
-$var reg 3 1" q_decode_cnt [2:0] $end
-$var reg 2 2" q_err_code [1:0] $end
-$var reg 17 3" q_execute_cnt [16:0] $end
-$var reg 8 4" q_io_dout [7:0] $end
-$var reg 1 5" q_io_en $end
-$var reg 8 6" q_io_in_wr_data [7:0] $end
-$var reg 1 7" q_io_in_wr_en $end
-$var reg 5 8" q_state [4:0] $end
-$var reg 8 9" q_tx_data [7:0] $end
-$var reg 1 :" q_wr_en $end
-$var reg 1 7 ram_wr $end
-$var reg 1 ;" rd_en $end
+$var wire 1 \ clk $end
+$var wire 32 "" cpu_dbgreg_din [31:0] $end
+$var wire 8 #" io_din [7:0] $end
+$var wire 1 n io_en $end
+$var wire 1 m io_full $end
+$var wire 3 $" io_sel [2:0] $end
+$var wire 1 b io_wr $end
+$var wire 17 %" ram_a [16:0] $end
+$var wire 8 &" ram_din [7:0] $end
+$var wire 8 '" ram_dout [7:0] $end
+$var wire 1 y rst $end
+$var wire 1 Z rx $end
+$var wire 1 (" tx_full $end
+$var wire 1 w tx $end
+$var wire 1 )" rx_empty $end
+$var wire 8 *" rd_data [7:0] $end
+$var wire 1 +" parity_err $end
+$var wire 8 ," io_in_rd_data [7:0] $end
+$var wire 1 -" io_in_full $end
+$var wire 1 ." io_in_empty $end
+$var wire 8 /" io_dout [7:0] $end
+$var wire 32 0" d_cpu_cycle_cnt [31:0] $end
+$var wire 1 p active $end
+$var reg 17 1" d_addr [16:0] $end
+$var reg 3 2" d_decode_cnt [2:0] $end
+$var reg 2 3" d_err_code [1:0] $end
+$var reg 17 4" d_execute_cnt [16:0] $end
+$var reg 8 5" d_io_dout [7:0] $end
+$var reg 8 6" d_io_in_wr_data [7:0] $end
+$var reg 1 7" d_io_in_wr_en $end
+$var reg 1 8" d_program_finish $end
+$var reg 5 9" d_state [4:0] $end
+$var reg 8 :" d_tx_data [7:0] $end
+$var reg 1 ;" d_wr_en $end
+$var reg 1 <" io_in_rd_en $end
+$var reg 1 h program_finish $end
+$var reg 17 =" q_addr [16:0] $end
+$var reg 32 >" q_cpu_cycle_cnt [31:0] $end
+$var reg 3 ?" q_decode_cnt [2:0] $end
+$var reg 2 @" q_err_code [1:0] $end
+$var reg 17 A" q_execute_cnt [16:0] $end
+$var reg 8 B" q_io_dout [7:0] $end
+$var reg 1 C" q_io_en $end
+$var reg 8 D" q_io_in_wr_data [7:0] $end
+$var reg 1 E" q_io_in_wr_en $end
+$var reg 5 F" q_state [4:0] $end
+$var reg 8 G" q_tx_data [7:0] $end
+$var reg 1 H" q_wr_en $end
+$var reg 1 i ram_wr $end
+$var reg 1 I" rd_en $end
 $scope module io_in_fifo $end
-$var wire 10 <" addr_bits_wide_1 [9:0] $end
-$var wire 1 - clk $end
-$var wire 1 =" d_empty $end
-$var wire 1 >" d_full $end
-$var wire 1 ~ empty $end
-$var wire 1 } full $end
-$var wire 8 ?" rd_data [7:0] $end
-$var wire 1 ." rd_en $end
-$var wire 1 @" rd_en_prot $end
-$var wire 1 J reset $end
-$var wire 8 A" wr_data [7:0] $end
-$var wire 1 7" wr_en $end
-$var wire 1 B" wr_en_prot $end
-$var wire 10 C" d_wr_ptr [9:0] $end
-$var wire 10 D" d_rd_ptr [9:0] $end
-$var wire 8 E" d_data [7:0] $end
-$var reg 1 F" q_empty $end
-$var reg 1 G" q_full $end
-$var reg 10 H" q_rd_ptr [9:0] $end
-$var reg 10 I" q_wr_ptr [9:0] $end
+$var wire 10 J" addr_bits_wide_1 [9:0] $end
+$var wire 1 \ clk $end
+$var wire 1 K" d_empty $end
+$var wire 1 L" d_full $end
+$var wire 1 ." empty $end
+$var wire 1 -" full $end
+$var wire 8 M" rd_data [7:0] $end
+$var wire 1 <" rd_en $end
+$var wire 1 N" rd_en_prot $end
+$var wire 1 y reset $end
+$var wire 8 O" wr_data [7:0] $end
+$var wire 1 E" wr_en $end
+$var wire 1 P" wr_en_prot $end
+$var wire 10 Q" d_wr_ptr [9:0] $end
+$var wire 10 R" d_rd_ptr [9:0] $end
+$var wire 8 S" d_data [7:0] $end
+$var reg 1 T" q_empty $end
+$var reg 1 U" q_full $end
+$var reg 10 V" q_rd_ptr [9:0] $end
+$var reg 10 W" q_wr_ptr [9:0] $end
 $upscope $end
 $scope module uart_blk $end
-$var wire 1 - clk $end
-$var wire 1 J" d_rx_parity_err $end
-$var wire 1 { parity_err $end
-$var wire 1 ;" rd_en $end
-$var wire 1 J reset $end
-$var wire 1 + rx $end
-$var wire 8 K" tx_data [7:0] $end
-$var wire 1 :" wr_en $end
-$var wire 1 x tx_full $end
-$var wire 8 L" tx_fifo_rd_data [7:0] $end
-$var wire 1 M" tx_fifo_empty $end
-$var wire 1 N" tx_done_tick $end
-$var wire 1 H tx $end
-$var wire 1 O" rx_parity_err $end
-$var wire 8 P" rx_fifo_wr_data [7:0] $end
-$var wire 1 y rx_empty $end
-$var wire 1 Q" rx_done_tick $end
-$var wire 8 R" rx_data [7:0] $end
-$var wire 1 S" baud_clk_tick $end
-$var reg 1 T" q_rx_parity_err $end
+$var wire 1 \ clk $end
+$var wire 1 X" d_rx_parity_err $end
+$var wire 1 +" parity_err $end
+$var wire 1 I" rd_en $end
+$var wire 1 y reset $end
+$var wire 1 Z rx $end
+$var wire 8 Y" tx_data [7:0] $end
+$var wire 1 H" wr_en $end
+$var wire 1 (" tx_full $end
+$var wire 8 Z" tx_fifo_rd_data [7:0] $end
+$var wire 1 [" tx_fifo_empty $end
+$var wire 1 \" tx_done_tick $end
+$var wire 1 w tx $end
+$var wire 1 ]" rx_parity_err $end
+$var wire 8 ^" rx_fifo_wr_data [7:0] $end
+$var wire 1 )" rx_empty $end
+$var wire 1 _" rx_done_tick $end
+$var wire 8 `" rx_data [7:0] $end
+$var wire 1 a" baud_clk_tick $end
+$var reg 1 b" q_rx_parity_err $end
 $scope module uart_baud_clk_blk $end
-$var wire 1 - clk $end
-$var wire 1 J reset $end
-$var wire 16 U" d_cnt [15:0] $end
-$var wire 1 S" baud_clk_tick $end
-$var reg 16 V" q_cnt [15:0] $end
+$var wire 1 \ clk $end
+$var wire 1 y reset $end
+$var wire 16 c" d_cnt [15:0] $end
+$var wire 1 a" baud_clk_tick $end
+$var reg 16 d" q_cnt [15:0] $end
 $upscope $end
 $scope module uart_rx_blk $end
-$var wire 1 S" baud_clk_tick $end
-$var wire 1 - clk $end
-$var wire 1 J reset $end
-$var wire 1 + rx $end
-$var wire 8 W" rx_data [7:0] $end
-$var wire 1 Q" rx_done_tick $end
-$var wire 1 O" parity_err $end
-$var reg 8 X" d_data [7:0] $end
-$var reg 3 Y" d_data_bit_idx [2:0] $end
-$var reg 1 Z" d_done_tick $end
-$var reg 4 [" d_oversample_tick_cnt [3:0] $end
-$var reg 1 \" d_parity_err $end
-$var reg 5 ]" d_state [4:0] $end
-$var reg 8 ^" q_data [7:0] $end
-$var reg 3 _" q_data_bit_idx [2:0] $end
-$var reg 1 Q" q_done_tick $end
-$var reg 4 `" q_oversample_tick_cnt [3:0] $end
-$var reg 1 O" q_parity_err $end
-$var reg 1 a" q_rx $end
-$var reg 5 b" q_state [4:0] $end
+$var wire 1 a" baud_clk_tick $end
+$var wire 1 \ clk $end
+$var wire 1 y reset $end
+$var wire 1 Z rx $end
+$var wire 8 e" rx_data [7:0] $end
+$var wire 1 _" rx_done_tick $end
+$var wire 1 ]" parity_err $end
+$var reg 8 f" d_data [7:0] $end
+$var reg 3 g" d_data_bit_idx [2:0] $end
+$var reg 1 h" d_done_tick $end
+$var reg 4 i" d_oversample_tick_cnt [3:0] $end
+$var reg 1 j" d_parity_err $end
+$var reg 5 k" d_state [4:0] $end
+$var reg 8 l" q_data [7:0] $end
+$var reg 3 m" q_data_bit_idx [2:0] $end
+$var reg 1 _" q_done_tick $end
+$var reg 4 n" q_oversample_tick_cnt [3:0] $end
+$var reg 1 ]" q_parity_err $end
+$var reg 1 o" q_rx $end
+$var reg 5 p" q_state [4:0] $end
 $upscope $end
 $scope module uart_rx_fifo $end
-$var wire 3 c" addr_bits_wide_1 [2:0] $end
-$var wire 1 - clk $end
-$var wire 1 d" d_empty $end
-$var wire 1 e" d_full $end
-$var wire 1 y empty $end
-$var wire 1 f" full $end
-$var wire 8 g" rd_data [7:0] $end
-$var wire 1 ;" rd_en $end
-$var wire 1 h" rd_en_prot $end
-$var wire 1 J reset $end
-$var wire 8 i" wr_data [7:0] $end
-$var wire 1 Q" wr_en $end
-$var wire 1 j" wr_en_prot $end
-$var wire 3 k" d_wr_ptr [2:0] $end
-$var wire 3 l" d_rd_ptr [2:0] $end
-$var wire 8 m" d_data [7:0] $end
-$var reg 1 n" q_empty $end
-$var reg 1 o" q_full $end
-$var reg 3 p" q_rd_ptr [2:0] $end
-$var reg 3 q" q_wr_ptr [2:0] $end
+$var wire 3 q" addr_bits_wide_1 [2:0] $end
+$var wire 1 \ clk $end
+$var wire 1 r" d_empty $end
+$var wire 1 s" d_full $end
+$var wire 1 )" empty $end
+$var wire 1 t" full $end
+$var wire 8 u" rd_data [7:0] $end
+$var wire 1 I" rd_en $end
+$var wire 1 v" rd_en_prot $end
+$var wire 1 y reset $end
+$var wire 8 w" wr_data [7:0] $end
+$var wire 1 _" wr_en $end
+$var wire 1 x" wr_en_prot $end
+$var wire 3 y" d_wr_ptr [2:0] $end
+$var wire 3 z" d_rd_ptr [2:0] $end
+$var wire 8 {" d_data [7:0] $end
+$var reg 1 |" q_empty $end
+$var reg 1 }" q_full $end
+$var reg 3 ~" q_rd_ptr [2:0] $end
+$var reg 3 !# q_wr_ptr [2:0] $end
 $upscope $end
 $scope module uart_tx_blk $end
-$var wire 1 S" baud_clk_tick $end
-$var wire 1 - clk $end
-$var wire 1 J reset $end
-$var wire 1 H tx $end
-$var wire 1 N" tx_done_tick $end
-$var wire 1 r" tx_start $end
-$var wire 8 s" tx_data [7:0] $end
-$var reg 4 t" d_baud_clk_tick_cnt [3:0] $end
-$var reg 8 u" d_data [7:0] $end
-$var reg 3 v" d_data_bit_idx [2:0] $end
-$var reg 1 w" d_parity_bit $end
-$var reg 5 x" d_state [4:0] $end
-$var reg 1 y" d_tx $end
-$var reg 1 z" d_tx_done_tick $end
-$var reg 4 {" q_baud_clk_tick_cnt [3:0] $end
-$var reg 8 |" q_data [7:0] $end
-$var reg 3 }" q_data_bit_idx [2:0] $end
-$var reg 1 ~" q_parity_bit $end
-$var reg 5 !# q_state [4:0] $end
-$var reg 1 "# q_tx $end
-$var reg 1 N" q_tx_done_tick $end
+$var wire 1 a" baud_clk_tick $end
+$var wire 1 \ clk $end
+$var wire 1 y reset $end
+$var wire 1 w tx $end
+$var wire 1 \" tx_done_tick $end
+$var wire 1 "# tx_start $end
+$var wire 8 ## tx_data [7:0] $end
+$var reg 4 $# d_baud_clk_tick_cnt [3:0] $end
+$var reg 8 %# d_data [7:0] $end
+$var reg 3 &# d_data_bit_idx [2:0] $end
+$var reg 1 '# d_parity_bit $end
+$var reg 5 (# d_state [4:0] $end
+$var reg 1 )# d_tx $end
+$var reg 1 *# d_tx_done_tick $end
+$var reg 4 +# q_baud_clk_tick_cnt [3:0] $end
+$var reg 8 ,# q_data [7:0] $end
+$var reg 3 -# q_data_bit_idx [2:0] $end
+$var reg 1 .# q_parity_bit $end
+$var reg 5 /# q_state [4:0] $end
+$var reg 1 0# q_tx $end
+$var reg 1 \" q_tx_done_tick $end
 $upscope $end
 $scope module uart_tx_fifo $end
-$var wire 10 ## addr_bits_wide_1 [9:0] $end
-$var wire 1 - clk $end
-$var wire 1 $# d_empty $end
-$var wire 1 %# d_full $end
-$var wire 1 M" empty $end
-$var wire 1 x full $end
-$var wire 8 &# rd_data [7:0] $end
-$var wire 1 N" rd_en $end
-$var wire 1 '# rd_en_prot $end
-$var wire 1 J reset $end
-$var wire 8 (# wr_data [7:0] $end
-$var wire 1 :" wr_en $end
-$var wire 1 )# wr_en_prot $end
-$var wire 10 *# d_wr_ptr [9:0] $end
-$var wire 10 +# d_rd_ptr [9:0] $end
-$var wire 8 ,# d_data [7:0] $end
-$var reg 1 -# q_empty $end
-$var reg 1 .# q_full $end
-$var reg 10 /# q_rd_ptr [9:0] $end
-$var reg 10 0# q_wr_ptr [9:0] $end
+$var wire 10 1# addr_bits_wide_1 [9:0] $end
+$var wire 1 \ clk $end
+$var wire 1 2# d_empty $end
+$var wire 1 3# d_full $end
+$var wire 1 [" empty $end
+$var wire 1 (" full $end
+$var wire 8 4# rd_data [7:0] $end
+$var wire 1 \" rd_en $end
+$var wire 1 5# rd_en_prot $end
+$var wire 1 y reset $end
+$var wire 8 6# wr_data [7:0] $end
+$var wire 1 H" wr_en $end
+$var wire 1 7# wr_en_prot $end
+$var wire 10 8# d_wr_ptr [9:0] $end
+$var wire 10 9# d_rd_ptr [9:0] $end
+$var wire 8 :# d_data [7:0] $end
+$var reg 1 ;# q_empty $end
+$var reg 1 <# q_full $end
+$var reg 10 =# q_rd_ptr [9:0] $end
+$var reg 10 ># q_wr_ptr [9:0] $end
 $upscope $end
 $upscope $end
 $upscope $end
 $scope module ram0 $end
-$var wire 17 1# a_in [16:0] $end
-$var wire 1 - clk_in $end
-$var wire 8 2# d_in [7:0] $end
-$var wire 1 3 en_in $end
-$var wire 1 3# r_nw_in $end
-$var wire 1 4# ram_bram_we $end
-$var wire 8 5# ram_bram_dout [7:0] $end
-$var wire 8 6# d_out [7:0] $end
+$var wire 17 ?# a_in [16:0] $end
+$var wire 1 \ clk_in $end
+$var wire 8 @# d_in [7:0] $end
+$var wire 1 e en_in $end
+$var wire 1 A# r_nw_in $end
+$var wire 1 B# ram_bram_we $end
+$var wire 8 C# ram_bram_dout [7:0] $end
+$var wire 8 D# d_out [7:0] $end
 $scope module ram_bram $end
-$var wire 17 7# addr_a [16:0] $end
-$var wire 1 - clk $end
-$var wire 8 8# din_a [7:0] $end
-$var wire 8 9# dout_a [7:0] $end
-$var wire 1 4# we $end
-$var reg 17 :# q_addr_a [16:0] $end
-$var integer 32 ;# i [31:0] $end
+$var wire 17 E# addr_a [16:0] $end
+$var wire 1 \ clk $end
+$var wire 8 F# din_a [7:0] $end
+$var wire 8 G# dout_a [7:0] $end
+$var wire 1 B# we $end
+$var reg 17 H# q_addr_a [16:0] $end
+$var integer 32 I# i [31:0] $end
 $upscope $end
 $upscope $end
 $upscope $end
 $enddefinitions $end
 #0
 $dumpvars
-b100000000000000000 ;#
+b100000000000000000 I#
+bx H#
+bx G#
+bx F#
+bx E#
+bx D#
+bx C#
+xB#
+xA#
+bx @#
+bx ?#
+bx >#
+bx =#
+x<#
+x;#
 bx :#
 bx 9#
 bx 8#
-bx 7#
+x7#
 bx 6#
-bx 5#
-x4#
+x5#
+bx 4#
 x3#
-bx 2#
-bx 1#
-bx 0#
+x2#
+b1 1#
+x0#
 bx /#
 x.#
-x-#
+bx -#
 bx ,#
 bx +#
-bx *#
-x)#
+0*#
+1)#
 bx (#
 x'#
 bx &#
-x%#
-x$#
-b1 ##
+bx %#
+bx $#
+bx ##
 x"#
 bx !#
-x~"
-bx }"
-bx |"
+bx ~"
+x}"
+x|"
 bx {"
-0z"
-1y"
-bx x"
-xw"
-bx v"
+bx z"
+bx y"
+xx"
+bx w"
+0v"
 bx u"
-bx t"
-bx s"
+xt"
+xs"
 xr"
-bx q"
+b1 q"
 bx p"
 xo"
-xn"
+bx n"
 bx m"
 bx l"
 bx k"
-xj"
+0j"
 bx i"
 0h"
 bx g"
-xf"
-xe"
-xd"
-b1 c"
-bx b"
+bx f"
+bx e"
+bx d"
+bx c"
+xb"
 xa"
 bx `"
-bx _"
+x_"
 bx ^"
-bx ]"
-0\"
-bx ["
-0Z"
+x]"
+x\"
+x["
+bx Z"
 bx Y"
-bx X"
+xX"
 bx W"
 bx V"
-bx U"
+xU"
 xT"
-xS"
+bx S"
 bx R"
-xQ"
-bx P"
-xO"
-xN"
-xM"
-bx L"
-bx K"
-xJ"
-bx I"
-bx H"
-xG"
-xF"
-bx E"
+bx Q"
+xP"
+bx O"
+0N"
+bx M"
+xL"
+xK"
+b1 J"
+0I"
+xH"
+bx G"
+bx F"
+xE"
 bx D"
-bx C"
-xB"
+xC"
+bx B"
 bx A"
-0@"
+bx @"
 bx ?"
-x>"
-x="
-b1 <"
+bx >"
+bx ="
+0<"
 0;"
-x:"
+b0 :"
 bx 9"
-bx 8"
-x7"
-bx 6"
-x5"
+08"
+07"
+b0 6"
+b0 5"
 bx 4"
 bx 3"
 bx 2"
 bx 1"
 bx 0"
 bx /"
-0."
-0-"
-b0 ,"
-bx +"
-0*"
-0)"
-b0 ("
-b0 '"
+x."
+x-"
+bx ,"
+x+"
+bx *"
+x)"
+x("
+bx '"
 bx &"
 bx %"
 bx $"
 bx #"
-bx ""
-bx !"
-x~
-x}
-bx |
-x{
-bx z
+bz ""
+x!"
+bz ~
+bx }
+bz |
+bz {
+xz
 xy
 xx
-bx w
+xw
 bx v
-bx u
+xu
 bx t
 bx s
-bz r
-bx q
-bx p
+xr
+xq
+xp
 bx o
-bx n
-bx m
+xn
+xm
 bx l
 bx k
 bx j
-bx i
+0i
 xh
 bx g
-bz f
-bx e
-bx d
-xc
-bx b
+bx f
+xe
+xd
+bx c
+xb
 bx a
-bx `
-bx _
-x^
-bx ]
-x\
-bx [
-xZ
-bx Y
-xX
+z`
+bz _
+bz ^
+bz ]
+z\
+z[
+zZ
+zY
+bx X
 bx W
-bx V
-xU
+zV
+bx U
 bx T
-bx S
-bx R
-xQ
-xP
-zO
-bz N
+bz S
+zR
+bz Q
+bz P
+bx O
+xN
 bx M
-bz L
-xK
+bx L
+bx K
 xJ
-xI
-xH
-bx G
-bx F
-bx E
-xD
-xC
+zI
+zH
+bz G
+zF
+zE
+zD
+bz C
 bx B
 bx A
 x@
-x?
+bx ?
 x>
 bx =
 x<
-x;
-bx :
-bx 9
-bx 8
-07
-x6
-bx 5
-bx 4
-x3
-x2
-bx 1
-x0
-bx /
-bz .
-z-
-z,
-z+
-z*
-bx )
-bx (
+bz ;
+z:
+z9
+z8
+z7
+bz 6
+z5
+z4
+z3
+bz 2
+z1
+bz 0
+z/
+bx .
+0-
+bx ,
+0+
+bx *
+0)
+z(
 z'
-bx &
-bx %
+bz &
+z%
 bz $
 z#
-bz "
-bz !
+x"
+z!
 $end

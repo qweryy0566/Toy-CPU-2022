@@ -46,11 +46,6 @@ module cpu(
   wire [31:0]    rob_to_if_pc;
 
 
-  initial begin
-    $dumpfile("test.vcd");
-    $dumpvars;
-  end
-
   MemCtrl mem_ctrl(
     .clk(clk_in),
     .rst(rst_in),

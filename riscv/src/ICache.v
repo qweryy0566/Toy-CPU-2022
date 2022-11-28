@@ -28,6 +28,7 @@ module ICache (
   always @(posedge clk) begin
     if (rst) begin
       isBusy <= `FALSE;
+      inst_enable <= `LOW;
       for (i = 0; i < `CacheEntries; i = i + 1) begin
         valid[i] <= `FALSE;
         tag[i]   <= 0;
@@ -58,6 +59,7 @@ module ICache (
             isBusy <= `TRUE;
             addr_enable <= `HIGH;
             addr_to_mem <= pc_from_if;
+            inst_enable <= `LOW;
           end
         end
       end else begin

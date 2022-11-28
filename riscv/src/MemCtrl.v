@@ -21,36 +21,35 @@ module MemCtrl (
   always @(posedge clk) begin
     if (rst) begin
       state <= 0;
-      mem_dout <= 0;
-      mem_a <= 0;
       ic_enable <= `LOW;
     end else if (~rdy) begin
       state <= 0;
-      mem_dout <= 0;
-      mem_a <= 0;
       ic_enable <= `LOW;
     end else begin
       // TODO : fake Memory Controller
-      if (ic_valid) begin
-        mem_a <= addr_from_ic;
-        mem_wr <= `LOW;
-        case (state)
-          3'h1: inst_to_ic[7:0] <= mem_din;
-          3'h2: inst_to_ic[15:8] <= mem_din;
-          3'h3: inst_to_ic[23:16] <= mem_din;
-          3'h4: inst_to_ic[31:24] <= mem_din;
-        endcase
-        if (state == 3'h4) begin
-          ic_enable <= `HIGH;
-          state <= 0;
-          mem_a <= 0;
-        end else begin
+      if (ic_valid) begin     
+        if (state == 0) begin
+          mem_a <= addr_from_ic;
+          mem_wr <= `LOW;
           ic_enable <= `LOW;
           state <= state + 1;
-          mem_a <= mem_a + 1;
+        end else begin
+          case (state)
+            3'h2: inst_to_ic[7:0] <= mem_din;
+            3'h3: inst_to_ic[15:8] <= mem_din;
+            3'h4: inst_to_ic[23:16] <= mem_din;
+            3'h5: inst_to_ic[31:24] <= mem_din;
+          endcase
+          if (state == 3'h5) begin
+            ic_enable <= `HIGH;
+            state <= 0;
+          end else begin
+            ic_enable <= `LOW;
+            state <= state + 1;
+            mem_a <= mem_a + 1;
+          end
         end
       end else begin
-        mem_a <= 0;
         mem_wr <= `LOW;
         ic_enable <= `LOW;
       end 

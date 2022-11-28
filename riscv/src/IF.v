@@ -25,7 +25,7 @@ module InstFetch (
     if (rst) begin
       isBusy <= `FALSE;
       pc_send_enable <= `LOW;
-      pc_to_ic <= 0;
+      pc <= 0;
       inst_send_enable <= `LOW;
       inst_to_dec <= 0;
     end else if (!rdy) begin
