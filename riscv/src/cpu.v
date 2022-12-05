@@ -38,9 +38,9 @@ module cpu(
   wire [31:0]    if_to_ic_pc;
   wire           ic_to_if_valid;
   wire [31:0]    ic_to_if_inst;
-  wire           if_to_id_valid;
-  wire [31:0]    if_to_id_inst;
-  wire [31:0]    if_to_id_pc;
+  wire           if_to_issue_valid;
+  wire [31:0]    if_to_issue_inst;
+  wire [31:0]    if_to_issue_pc;
 
   wire           rob_to_if_valid;
   wire [31:0]    rob_to_if_pc;
@@ -83,9 +83,9 @@ module cpu(
     .pc_to_ic(if_to_ic_pc),
     .inst_get_ready(ic_to_if_valid),
     .inst_from_ic(ic_to_if_inst),
-    .inst_send_enable(if_to_id_valid),
-    .inst_to_dec(if_to_id_inst),
-    .pc_to_dec(if_to_id_pc),
+    .inst_send_enable(if_to_issue_valid),
+    .inst_to_issue(if_to_issue_inst),
+    .pc_to_issue(if_to_issue_pc),
     .jump_flag(rob_to_if_valid),
     .target_pc(rob_to_if_pc)
   );

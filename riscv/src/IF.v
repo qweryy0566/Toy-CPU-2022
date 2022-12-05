@@ -12,8 +12,8 @@ module InstFetch (
   input wire [31:0]  inst_from_ic,   // I-cache
 
   output reg         inst_send_enable,
-  output reg [31:0]  inst_to_dec, 
-  output reg [31:0]  pc_to_dec,
+  output reg [31:0]  inst_to_issue, 
+  output reg [31:0]  pc_to_issue,
 
   input wire         jump_flag,
   input wire [31:0]  target_pc
@@ -27,7 +27,7 @@ module InstFetch (
       pc_send_enable <= `LOW;
       pc <= 0;
       inst_send_enable <= `LOW;
-      inst_to_dec <= 0;
+      inst_to_issue <= 0;
     end else if (!rdy) begin
       isBusy <= `FALSE;
       pc_send_enable <= `LOW;
@@ -42,8 +42,8 @@ module InstFetch (
       if (isBusy) begin
         if (inst_get_ready) begin
           inst_send_enable <= `HIGH;
-          inst_to_dec <= inst_from_ic;
-          pc_to_dec <= pc;
+          inst_to_issue <= inst_from_ic;
+          pc_to_issue <= pc;
           isBusy <= `FALSE;
           pc <= pc + 3'b100;
           pc_send_enable <= `LOW;
