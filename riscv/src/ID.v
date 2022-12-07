@@ -1,5 +1,8 @@
 `include "config.v"
 
+`ifndef __INST_DECODE__
+`define __INST_DECODE__
+
 module InstDecode (
   input wire [31:0]  inst,
   
@@ -13,9 +16,11 @@ module InstDecode (
   wire [2:0] funct3 = inst[14:12];
   wire [6:0] funct7 = inst[31:25];
   always @(*) begin
+    op_type = `OP_NOP;
     rd = 0;
     rs1 = 0;
     rs2 = 0;
+    imm = 0;
     case (opcode)
       7'b0110111: begin
         op_type = `OP_LUI;
@@ -124,3 +129,5 @@ module InstDecode (
     endcase
   end
 endmodule
+
+`endif

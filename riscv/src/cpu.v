@@ -1,5 +1,8 @@
 `include "config.v"
 
+`ifndef __CPU__
+`define __CPU__
+
 // RISCV32I CPU top module
 // port modification allowed for debugging purposes
 
@@ -89,4 +92,7 @@ module cpu(
     .jump_flag(rob_to_if_valid),
     .target_pc(rob_to_if_pc)
   );
+
 endmodule
+
+`endif

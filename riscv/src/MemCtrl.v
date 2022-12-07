@@ -42,7 +42,6 @@ module MemCtrl (
           endcase
           if (state == 3'h5) begin
             ic_enable <= `HIGH;
-            state <= 0;
           end else begin
             ic_enable <= `LOW;
             state <= state + 1;
@@ -50,6 +49,7 @@ module MemCtrl (
           end
         end
       end else begin
+        state <= 0;
         mem_wr <= `LOW;
         ic_enable <= `LOW;
       end 

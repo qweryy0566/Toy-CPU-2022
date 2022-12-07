@@ -5,7 +5,7 @@
 
 `define CacheEntries 256
 
-`define OP_HALT 6'd0
+`define OP_NOP 6'd0
 `define OP_ADD 6'd1
 `define OP_SUB 6'd2
 `define OP_XOR 6'd3
@@ -43,5 +43,11 @@
 `define OP_JALR 6'd35
 `define OP_LUI 6'd36
 `define OP_AUIPC 6'd37
+
+`define ROB_LOG 5
+`define ROB_SIZE 32
+`define RS_LOG 5
+`define RS_SIZE 32
+
 
 
