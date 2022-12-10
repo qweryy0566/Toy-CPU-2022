@@ -23,9 +23,9 @@ module Issue (
 
   output reg        rs_send_enable
 );
-  wire [5:0] op_type;
-  wire [4:0] rd, rs1, rs2;
-  wire [31:0] imm;
+  wire [`OP_LOG - 1:0] op_type;
+  wire [4:0]           rd, rs1, rs2;
+  wire [31:0]          imm;
 
   reg [5:0] issue_op;
   reg [4:0] issue_rd, issue_rs1, issue_rs2;

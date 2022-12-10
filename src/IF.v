@@ -65,6 +65,9 @@ module InstFetch (
         inst_send_enable <= `LOW;
       end
     end
+
+    if (inst_send_enable)
+      inst_send_enable <= `LOW;
   end
   
 endmodule

@@ -14,8 +14,10 @@ module RegFile (
   input wire [31:0]  rs2,
 
   output reg [31:0]            Vj_to_issue,
+  output reg                   Rj_to_issue,
   output reg [`ROB_LOG - 1:0]  Qj_to_issue,
   output reg [31:0]            Vk_to_issue,
+  output reg                   Rk_to_issue,
   output reg [`ROB_LOG - 1:0]  Qk_to_issue,
 
   input wire                   commit_valid,
@@ -33,16 +35,17 @@ module RegFile (
     if (rs1_valid) begin
       if (reorder[rs1] == 0) begin
         Vj_to_issue = regFile[rs1];
-        Qj_to_issue = 0;
+        Rj_to_issue = 1;
       end else if (commit_valid && commit_reorder == reorder[rs1]) begin
         Vj_to_issue = commit_value;
-        Qj_to_issue = 0;
+        Rj_to_issue = 1;
       end else begin
-        Vj_to_issue = 0;
+        Rj_to_issue = 0;
         Qj_to_issue = reorder[rs1];
       end
     end else begin
       Vj_to_issue = 0;
+      Rj_to_issue = 0;
       Qj_to_issue = 0;
     end
   end
@@ -51,16 +54,17 @@ module RegFile (
     if (rs2_valid) begin
       if (reorder[rs2] == 0) begin
         Vk_to_issue = regFile[rs2];
-        Qk_to_issue = 0;
+        Rk_to_issue = 1;
       end else if (commit_valid && commit_reorder == reorder[rs2]) begin
         Vk_to_issue = commit_value;
-        Qk_to_issue = 0;
+        Rk_to_issue = 1;
       end else begin
-        Vk_to_issue = 0;
+        Rk_to_issue = 0;
         Qk_to_issue = reorder[rs2];
       end
     end else begin
       Vk_to_issue = 0;
+      Rk_to_issue = 0;
       Qk_to_issue = 0;
     end
   end

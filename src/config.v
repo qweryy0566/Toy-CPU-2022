@@ -48,6 +48,8 @@
 `define ROB_SIZE 32
 `define RS_LOG 5
 `define RS_SIZE 32
+`define OP_LOG 6
+`define OP_SIZE 38
 
 
 
