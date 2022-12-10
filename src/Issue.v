@@ -27,6 +27,10 @@ module Issue (
   wire [4:0] rd, rs1, rs2;
   wire [31:0] imm;
 
+  reg [5:0] issue_op;
+  reg [4:0] issue_rd, issue_rs1, issue_rs2;
+  reg [31:0] issue_imm;
+
   InstDecode inst_decode (
     .inst(inst_from_if),
     .op_type(op_type),
