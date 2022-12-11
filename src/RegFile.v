@@ -23,7 +23,13 @@ module RegFile (
   input wire                   commit_valid,
   input wire [4:0]             commit_dest,
   input wire [31:0]            commit_value,
-  input wire [`ROB_LOG - 1:0]  commit_reorder
+  input wire [`ROB_LOG - 1:0]  commit_RobId,
+
+  input wire                   rename_valid,
+  input wire [4:0]             issue_rd,
+  input wire [`ROB_LOG - 1:0]  issue_RobId,
+
+  input wire                   jump_flag
 
 );
 
@@ -36,7 +42,7 @@ module RegFile (
       if (reorder[rs1] == 0) begin
         Vj_to_issue = regFile[rs1];
         Rj_to_issue = 1;
-      end else if (commit_valid && commit_reorder == reorder[rs1]) begin
+      end else if (commit_valid && commit_RobId == reorder[rs1]) begin
         Vj_to_issue = commit_value;
         Rj_to_issue = 1;
       end else begin
@@ -55,7 +61,7 @@ module RegFile (
       if (reorder[rs2] == 0) begin
         Vk_to_issue = regFile[rs2];
         Rk_to_issue = 1;
-      end else if (commit_valid && commit_reorder == reorder[rs2]) begin
+      end else if (commit_valid && commit_RobId == reorder[rs2]) begin
         Vk_to_issue = commit_value;
         Rk_to_issue = 1;
       end else begin
@@ -76,8 +82,19 @@ module RegFile (
         reorder[i] <= 0;
       end
     end else if (~rdy) begin
+
+    end else if (jump_flag) begin
+      for (i = 0; i < 32; i = i + 1)
+        reorder[i] <= 0;
     end else begin
-      
+      if (commit_valid) begin
+        if (commit_RobId == reorder[commit_dest])
+          reorder[commit_dest] <= 0;
+        if (commit_dest)
+          regFile[commit_dest] <= commit_value;
+      end
+      if (rename_valid && issue_rd)
+        reorder[issue_rd] = issue_RobId;
     end
   end
 

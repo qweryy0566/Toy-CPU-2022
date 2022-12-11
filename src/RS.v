@@ -51,19 +51,23 @@ module RS (
   reg [`ROB_LOG - 1:0]  DestRob[`RS_SIZE - 1:0];
   reg [31:0]            CurPC[`RS_SIZE - 1:0];
 
-  integer i, j, cnt, empty_pos;
+  reg     has_ready;
+  integer i, j, cnt, empty_pos, ready_pos;
 
   always @(*) begin
     cnt = 0;
+    has_ready = 0;
     for (j = 0; j < `RS_SIZE; j = j + 1)
-      if (isBusy[j])
+      if (isBusy[j]) begin
         cnt = cnt + 1;
-      else
+        if (Rj[j] && Rk[j]) begin
+          has_ready = 1;
+          ready_pos = j;
+        end
+      end else begin
         empty_pos = j;
-    if (cnt + 1 >= `RS_SIZE)
-      RS_next_full = 1;
-    else
-      RS_next_full = 0;
+      end
+    RS_next_full = cnt + 1 - has_ready <= `RS_SIZE;
   end
 
   always @(posedge clk) begin
@@ -72,7 +76,6 @@ module RS (
         isBusy[i] <= 0;
       end
       FU_enable <= 0;
-      empty_pos <= 0;
     end else if (~rdy) begin
       FU_enable <= 0;
     end else begin
@@ -90,17 +93,17 @@ module RS (
         CurPC[empty_pos] <= issue_CurPC;
       end
       // now check if there i a ready instruction
-      FU_enable <= 0;
-      for (i = 0; i < `RS_SIZE; i = i + 1) begin
-        if (isBusy[i] && Rj[i] && Rk[i]) begin
-          FU_enable <= 1;
-          FU_op <= OpType[i];
-          FU_Vj <= Vj[i];
-          FU_Vk <= Vk[i];
-          FU_Imm <= Imm[i];
-          FU_DestRob <= DestRob[i];
-          FU_CurPC <= CurPC[i];
-        end
+      if (~has_ready)
+        FU_enable <= 0;
+      else begin
+        FU_enable <= 1;
+        FU_op <= OpType[has_ready];
+        FU_Vj <= Vj[has_ready];
+        FU_Vk <= Vk[has_ready];
+        FU_Imm <= Imm[has_ready];
+        FU_DestRob <= DestRob[has_ready];
+        FU_CurPC <= CurPC[has_ready];
+        isBusy[has_ready] <= 0;
       end
       // now receive the result from the FU
       if (exc_valid) begin
