@@ -14,7 +14,15 @@ module MemCtrl (
   input wire        ic_valid,
   input wire [31:0] addr_from_ic,
   output reg        ic_enable,
-  output reg [31:0] inst_to_ic
+  output reg [31:0] inst_to_ic,
+
+  input wire        lsb_valid,
+  input wire [31:0] lsb_addr,
+  input wire [31:0] lsb_store_data,
+  input wire [2:0]  lsb_size,
+  input wire        lsb_wr_tag,
+  output reg        lsb_enable,
+  output reg [31:0] lsb_load_data
 );
 
   reg [2:0] state;

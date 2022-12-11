@@ -1,4 +1,5 @@
 `include "config.v"
+`include "IF.v"
 
 `ifndef __CPU__
 `define __CPU__

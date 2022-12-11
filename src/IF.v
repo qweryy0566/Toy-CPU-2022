@@ -1,5 +1,8 @@
 `include "config.v" 
 
+`ifndef __InstFetch__
+`define __InstFetch__
+
 module InstFetch (
   input wire          clk,
   input wire          rst,
@@ -71,3 +74,5 @@ module InstFetch (
   end
   
 endmodule
+
+`endif

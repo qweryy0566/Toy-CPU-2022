@@ -50,6 +50,8 @@
 `define RS_SIZE 32
 `define OP_LOG 6
 `define OP_SIZE 38
+`define LSB_LOG 5
+`define LSB_SIZE 32
 
 
 

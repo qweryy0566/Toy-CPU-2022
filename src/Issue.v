@@ -9,9 +9,9 @@ module Issue (
   input wire         rst,
   input wire         rdy,
 
-  input wire        inst_valid,
-  input wire [31:0] inst_from_if,
-  input wire [31:0] pc_from_if,
+  input wire         inst_valid,
+  input wire [31:0]  inst_from_if,
+  input wire [31:0]  pc_from_if,
 
   // RegFile
   output reg                  rs1_enable,
@@ -46,7 +46,15 @@ module Issue (
   output reg [31:0]           rs_send_Imm,
   output reg [31:0]           rs_send_CurPc,
 
-  output reg                  lsb_send_enable
+  output reg                  lsb_send_enable,
+  output reg [`OP_LOG - 1:0]  lsb_send_op,
+  output reg [31:0]           lsb_send_Vj,
+  output reg                  lsb_send_Rj,
+  output reg [`ROB_LOG - 1:0] lsb_send_Qj,
+  output reg [31:0]           lsb_send_Vk,
+  output reg                  lsb_send_Rk,
+  output reg [`ROB_LOG - 1:0] lsb_send_Qk,
+  output reg [31:0]           lsb_send_Imm
 );
   wire [`OP_LOG - 1:0] op_type;
   wire [4:0]           rd, rs1, rs2;
@@ -83,7 +91,15 @@ module Issue (
       send_RobId = rob_next;
 
       if (op_type >= `OP_LB && op_type <= `OP_SW) begin
-        
+        lsb_send_enable = 1;
+        lsb_send_op = op_type;
+        lsb_send_Vj = Vj_from_reg;
+        lsb_send_Rj = Rj_from_reg;
+        lsb_send_Qj = Qj_from_reg;
+        lsb_send_Vk = Vk_from_reg;
+        lsb_send_Rk = Rk_from_reg;
+        lsb_send_Qk = Qk_from_reg;
+        lsb_send_Imm = imm;
       end else begin
         rs_send_enable = 1;
         rs_send_op = op_type;
@@ -96,8 +112,6 @@ module Issue (
         rs_send_Imm = imm;
         rs_send_CurPc = pc_from_if;
       end
-      
-
     end else begin
       rs1_enable = 0;
       rs2_enable = 0;
@@ -106,9 +120,6 @@ module Issue (
       rs_send_enable = 0;
     end
   end
-
-
-
 endmodule
 
 `endif
