@@ -22,6 +22,7 @@ module LSBuffer (
   input wire [`ROB_LOG - 1:0] issue_DestRob,
 
   input wire                  rob_committed,
+  input wire [`ROB_LOG - 1:0] rob_RobId,
 
   // broadcast from FU
   input wire                  exc_valid,
@@ -117,6 +118,11 @@ module LSBuffer (
               Vk[i] <= B_value;
             end
           end
+      
+      if (rob_committed)
+        for (i = 0; i < `LSB_SIZE; i = i + 1)
+          if (DestRob[i] == rob_RobId)
+            isReady[i] <= `TRUE;
 
       if (isWaitingMem) begin
         if (mem_success) begin
@@ -136,7 +142,59 @@ module LSBuffer (
         end
       end else begin
         B_enable <= `FALSE;
-        
+        mem_enable <= `FALSE;
+        if (Rj[top_id] && Rk[top_id]) begin
+          case (OpType[top_id])
+            `OP_LB, `OP_LBU: begin
+              mem_enable <= `TRUE;
+              op_size <= 3'b001;
+              mem_addr <= Vj[top_id] + Imm[top_id];
+              mem_wr_tag <= `LOAD;
+              isWaitingMem <= `TRUE;
+            end
+            `OP_LH, `OP_LHU: begin
+              mem_enable <= `TRUE;
+              op_size <= 3'b010;
+              mem_addr <= Vj[top_id] + Imm[top_id];
+              mem_wr_tag <= `LOAD;
+              isWaitingMem <= `TRUE;
+            end
+            `OP_LW: begin
+              mem_enable <= `TRUE;
+              op_size <= 3'b100;
+              mem_addr <= Vj[top_id] + Imm[top_id];
+              mem_wr_tag <= `LOAD;
+              isWaitingMem <= `TRUE;
+            end
+            `OP_SB: 
+              if(isReady[top_id]) begin
+                mem_enable <= `TRUE;
+                op_size <= 3'b001;
+                mem_addr <= Vj[top_id] + Imm[top_id];
+                mem_wdata <= Vk[top_id];
+                mem_wr_tag <= `STORE;
+                head <= top_id;
+              end
+            `OP_SH:
+              if(isReady[top_id]) begin
+                mem_enable <= `TRUE;
+                op_size <= 3'b010;
+                mem_addr <= Vj[top_id] + Imm[top_id];
+                mem_wdata <= Vk[top_id];
+                mem_wr_tag <= `STORE;
+                head <= top_id;
+              end
+            `OP_SW:
+              if(isReady[top_id]) begin
+                mem_enable <= `TRUE;
+                op_size <= 3'b100;
+                mem_addr <= Vj[top_id] + Imm[top_id];
+                mem_wdata <= Vk[top_id];
+                mem_wr_tag <= `STORE;
+                head <= top_id;
+              end
+          endcase
+        end
       end
     end
   end
