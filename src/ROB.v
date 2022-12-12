@@ -34,6 +34,7 @@ module ROB (
 );
 
   reg[`ROB_LOG - 1:0]  head, tail;
+  reg                  isEmpty;
   reg                  isReady[`ROB_SIZE - 1:0];
   reg [`OP_LOG - 1:0]  OpType[`ROB_SIZE - 1:0];
   reg[4:0]             DestReg[`ROB_SIZE - 1:0];
@@ -47,6 +48,7 @@ module ROB (
   always @(*) begin
     rob_next_full = (tail + 2 & `ROB_SIZE - 1) == head;
     rob_next = tail + 1 & `ROB_SIZE - 1;
+    isEmpty = head == tail;
   end
 
   always @(posedge clk) begin
@@ -79,7 +81,7 @@ module ROB (
       jump_flag <= 0;
       reg_enable <= 0;
       lsb_begin_store <= 0;
-      if (isReady[top_id]) begin
+      if (~isEmpty && isReady[top_id]) begin
         case (OpType[top_id])
           `OP_BEQ, `OP_BNE, `OP_BLT, `OP_BGE, `OP_BLTU, `OP_BGEU:
             if (~ToPC[top_id] != 0) begin

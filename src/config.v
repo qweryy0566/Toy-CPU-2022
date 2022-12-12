@@ -53,5 +53,6 @@
 `define LSB_LOG 5
 `define LSB_SIZE 32
 
-
+`define STORE 1'b1
+`define LOAD 1'b0
 
