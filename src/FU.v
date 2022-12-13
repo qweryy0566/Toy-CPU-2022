@@ -1,5 +1,8 @@
 `include "config.v"
 
+`ifndef __FU__
+`define __FU__
+
 module FU (
   input wire                  RS_valid,
   input wire [`OP_LOG - 1:0]  RS_op,
@@ -95,3 +98,5 @@ module FU (
   end
 
 endmodule
+
+`endif

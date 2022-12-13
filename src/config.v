@@ -56,3 +56,7 @@
 `define STORE 1'b1
 `define LOAD 1'b0
 
+`define STATUS_IDLE 2'b00
+`define STATUS_IF 2'b01
+`define STATUS_LOAD 2'b10
+`define STATUS_STORE 2'b11

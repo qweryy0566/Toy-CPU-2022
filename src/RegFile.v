@@ -9,9 +9,9 @@ module RegFile (
   input wire         rdy,
 
   input wire         rs1_valid,
-  input wire [31:0]  rs1,
+  input wire [4:0]   rs1,
   input wire         rs2_valid,
-  input wire [31:0]  rs2,
+  input wire [4:0]   rs2,
 
   output reg [31:0]            Vj_to_issue,
   output reg                   Rj_to_issue,

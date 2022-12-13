@@ -41,6 +41,11 @@ module LSBuffer (
   output reg                  B_enable,
   output reg [`ROB_LOG - 1:0] B_RobId,
   output reg [31:0]           B_value,
+
+  // LSB broadcast to ROB specially for store
+  output reg                  store_enable,
+  output reg [`ROB_LOG - 1:0] store_RobId,
+
   output wire                 LSB_next_full
 );
 
@@ -77,7 +82,10 @@ module LSBuffer (
     end else if (~rdy) begin
       
     end else if (jump_flag) begin
-      
+      if (isWaitingMem)
+        tail <= top_id;
+      else
+        tail <= head;
     end else begin
       if (issue_valid) begin
         isReady[next] <= issue_op < `OP_SB;
@@ -118,12 +126,20 @@ module LSBuffer (
               Vk[i] <= B_value;
             end
           end
-      
+
+      store_enable <= `FALSE;
+      if (OpType[top_id] >= `OP_SB && Rj[top_id] && Rk[top_id]) begin
+        store_enable <= `TRUE;
+        store_RobId <= DestRob[top_id];
+      end
+
       if (rob_committed)
         for (i = 0; i < `LSB_SIZE; i = i + 1)
           if (DestRob[i] == rob_RobId)
             isReady[i] <= `TRUE;
 
+      B_enable <= `FALSE;
+      mem_enable <= `FALSE;
       if (isWaitingMem) begin
         if (mem_success) begin
           if (mem_wr_tag == `LOAD) begin
@@ -141,8 +157,6 @@ module LSBuffer (
           head <= top_id;
         end
       end else begin
-        B_enable <= `FALSE;
-        mem_enable <= `FALSE;
         if (Rj[top_id] && Rk[top_id]) begin
           case (OpType[top_id])
             `OP_LB, `OP_LBU: begin
@@ -173,7 +187,7 @@ module LSBuffer (
                 mem_addr <= Vj[top_id] + Imm[top_id];
                 mem_wdata <= Vk[top_id];
                 mem_wr_tag <= `STORE;
-                head <= top_id;
+                isWaitingMem <= `TRUE;
               end
             `OP_SH:
               if(isReady[top_id]) begin
@@ -182,7 +196,7 @@ module LSBuffer (
                 mem_addr <= Vj[top_id] + Imm[top_id];
                 mem_wdata <= Vk[top_id];
                 mem_wr_tag <= `STORE;
-                head <= top_id;
+                isWaitingMem <= `TRUE;
               end
             `OP_SW:
               if(isReady[top_id]) begin
@@ -191,7 +205,7 @@ module LSBuffer (
                 mem_addr <= Vj[top_id] + Imm[top_id];
                 mem_wdata <= Vk[top_id];
                 mem_wr_tag <= `STORE;
-                head <= top_id;
+                isWaitingMem <= `TRUE;
               end
           endcase
         end

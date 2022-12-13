@@ -1,5 +1,8 @@
 `include "config.v"
 
+`ifndef __ROB__
+`define __ROB__
+
 module ROB (
   input wire         clk,
   input wire         rst,
@@ -16,7 +19,10 @@ module ROB (
 
   input wire                  lsb_valid,
   input wire [31:0]           lsb_value,
-  input wire [31:0]           lsb_RobId,
+  input wire [`ROB_LOG - 1:0] lsb_RobId,
+
+  input wire                  store_valid,
+  input wire [`ROB_LOG - 1:0] store_RodId,
 
   // commit wire
   output reg                  reg_enable,
@@ -28,6 +34,7 @@ module ROB (
   output reg [31:0]           if_toPC,
 
   output reg                  lsb_begin_store,
+  output reg [`ROB_LOG - 1:0] lsb_store_RobId,
 
   output reg                  rob_next_full,
   output reg [`ROB_LOG - 1:0] rob_next
@@ -59,6 +66,7 @@ module ROB (
         isReady[i] <= 0;
         ToPC[i] <= -1;
       end 
+      jump_flag <= 0;
     end else if (~rdy) begin
 
     end else begin
@@ -76,6 +84,9 @@ module ROB (
       if (lsb_valid) begin
         isReady[lsb_RobId] <= 1;
         Value[lsb_RobId] <= lsb_value;
+      end
+      if (store_valid) begin
+        isReady[store_RodId] <= 1;
       end
 
       jump_flag <= 0;
@@ -107,3 +118,5 @@ module ROB (
   end
   
 endmodule
+
+`endif

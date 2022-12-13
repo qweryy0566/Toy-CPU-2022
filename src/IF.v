@@ -21,9 +21,9 @@ module InstFetch (
   input wire         jump_flag,
   input wire [31:0]  target_pc,
 
-  input wire        rob_full,
-  input wire        rs_full,
-  input wire        lsb_full
+  input wire         rob_next_full,
+  input wire         rs_next_full,
+  input wire         lsb_next_full
 );
   reg [31:0] pc;
   reg        isBusy;
@@ -44,7 +44,7 @@ module InstFetch (
       isBusy <= `FALSE;
       pc_send_enable <= `LOW;
       inst_send_enable <= `LOW;
-    end else if (rob_full || rs_full || lsb_full) begin
+    end else if (rob_next_full || rs_next_full || lsb_next_full) begin
       isBusy <= `FALSE;
       pc_send_enable <= `LOW;
       inst_send_enable <= `LOW;

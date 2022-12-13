@@ -1,5 +1,8 @@
 `include "config.v"
 
+`ifndef __ICache__
+`define __ICache__
+
 module ICache (
   input wire         clk,
   input wire         rst,
@@ -29,10 +32,11 @@ module ICache (
     if (rst) begin
       isBusy <= `FALSE;
       inst_enable <= `LOW;
-      for (i = 0; i < `CacheEntries; i = i + 1) begin
-        valid[i] <= `FALSE;
-        tag[i]   <= 0;
-        data[i]  <= 0;
+      for (i = 0; i << 2 < `CacheEntries; i = i + 1) begin
+        valid[i << 2] <= `FALSE;
+        valid[i << 2 | 1] <= `FALSE;
+        valid[i << 2 | 2] <= `FALSE;
+        valid[i << 2 | 3] <= `FALSE;
       end
     end else if (~rdy) begin
       isBusy <= `FALSE;
@@ -71,3 +75,5 @@ module ICache (
   end
 
 endmodule
+
+`endif

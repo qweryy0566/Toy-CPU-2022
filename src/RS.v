@@ -36,6 +36,7 @@ module RS (
   input wire [`ROB_LOG - 1:0]  LSB_RobId,
   input wire [31:0]            LSB_value,
 
+  input wire                   jump_flag,
   output reg                   RS_next_full
 );
   
@@ -71,7 +72,7 @@ module RS (
   end
 
   always @(posedge clk) begin
-    if (rst) begin
+    if (rst || jump_flag) begin
       for (i = 0; i < `RS_SIZE; i = i + 1) begin
         isBusy[i] <= 0;
       end
