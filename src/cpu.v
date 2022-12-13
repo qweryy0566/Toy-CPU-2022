@@ -69,6 +69,12 @@ module cpu(
   wire [4:0]            issue_to_reg_rs1_id;
   wire                  issue_to_reg_rs2_valid;
   wire [4:0]            issue_to_reg_rs2_id;
+  wire [`ROB_LOG - 1:0] issue_to_rob_rs1_RobId;
+  wire [`ROB_LOG - 1:0] issue_to_rob_rs2_RobId;
+  wire                  rob_to_issue_rs1_ready;
+  wire [31:0]           rob_to_issue_rs1_value;
+  wire                  rob_to_issue_rs2_ready;
+  wire [31:0]           rob_to_issue_rs2_value;
   wire [31:0]           reg_to_issue_Vj;
   wire [31:0]           reg_to_issue_Vk;
   wire                  reg_to_issue_Rj;
@@ -210,6 +216,12 @@ module cpu(
     .rs1_to_reg      (issue_to_reg_rs1_id),
     .rs2_enable      (issue_to_reg_rs2_valid),
     .rs2_to_reg      (issue_to_reg_rs2_id),
+    .check_rob_rs1   (issue_to_rob_rs1_RobId),
+    .check_rob_rs2   (issue_to_rob_rs2_RobId),
+    .rob_rs1_ready   (rob_to_issue_rs1_ready),
+    .rob_rs1_value   (rob_to_issue_rs1_value),
+    .rob_rs2_ready   (rob_to_issue_rs2_ready),
+    .rob_rs2_value   (rob_to_issue_rs2_value),
     .Vj_from_reg     (reg_to_issue_Vj),
     .Rj_from_reg     (reg_to_issue_Rj),
     .Qj_from_reg     (reg_to_issue_Qj),
@@ -324,6 +336,12 @@ module cpu(
     .if_toPC         (rob_to_if_pc),
     .lsb_begin_store (rob_to_lsb_valid),
     .lsb_store_RobId (rob_to_lsb_RobId),
+    .issue_query_rs1 (issue_to_rob_rs1_RobId),
+    .issue_query_rs2 (issue_to_rob_rs2_RobId),
+    .rs1_ready       (rob_to_issue_rs1_ready),
+    .rs1_value       (rob_to_issue_rs1_value),
+    .rs2_ready       (rob_to_issue_rs2_ready),
+    .rs2_value       (rob_to_issue_rs2_value),
     .rob_next_full   (rob_next_full   ),
     .rob_next        (rob_next        )
   );

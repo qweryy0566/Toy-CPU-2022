@@ -16,7 +16,6 @@ module ICache (
 
   output reg         addr_enable,
   output reg [31:0]  addr_to_mem,
-  input wire         mem_accept,
 
   input wire         mem_valid,
   input wire [31:0]  inst_from_mem

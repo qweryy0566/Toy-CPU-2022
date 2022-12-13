@@ -20,6 +20,21 @@ module Issue (
   input wire [31:0]           Vk_from_reg,
   input wire                  Rk_from_reg,
   input wire [`ROB_LOG - 1:0] Qk_from_reg,
+  // If RegFile cannot answer, then it will send a request to the ROB
+  // C++ code:
+  // if (reg_in.Reorder(inst.rs1))
+  //   if (ROB_in[reg_in.Reorder(inst.rs1)].isReady)
+  //     send.Vj = ROB_in[reg_in.Reorder(inst.rs1)].value, send.Qj = 0;
+  //   else
+  //     send.Qj = reg_in.Reorder(inst.rs1);
+  // else
+  //   send.Vj = reg_in[inst.rs1], send.Qj = 0;
+  output reg [`ROB_LOG - 1:0] check_rob_rs1,
+  output reg [`ROB_LOG - 1:0] check_rob_rs2,
+  input wire                  rob_rs1_ready,
+  input wire                  rob_rs2_ready,
+  input wire [31:0]           rob_rs1_value,
+  input wire [31:0]           rob_rs2_value,         
 
   input wire [`ROB_LOG - 1:0] rob_next,
   output reg                  rob_send_enable,
@@ -59,6 +74,9 @@ module Issue (
   reg [5:0] issue_op;
   reg [4:0] issue_rd, issue_rs1, issue_rs2;
   reg [31:0] issue_imm;
+  reg [31:0]           Vj, Vk;
+  reg                  Rj, Rk;
+  reg [`ROB_LOG - 1:0] Qj, Qk;
 
   InstDecode inst_decode (
     .inst(inst_from_if),
@@ -91,26 +109,53 @@ module Issue (
       reg_send_index = rd;
       
       send_RobId = rob_next;
+      
+      if (~Rj_from_reg) begin
+        check_rob_rs1 = Qj_from_reg;
+        if (rob_rs1_ready) begin
+          Vj = rob_rs1_value;
+          Rj = 1;
+        end else begin
+          Rj = 0;
+          Qj = Qj_from_reg;
+        end
+      end else begin
+        Vj = Vj_from_reg;
+        Rj = 1;
+      end
+      if (~Rk_from_reg) begin
+        check_rob_rs2 = Qk_from_reg;
+        if (rob_rs2_ready) begin
+          Vk = rob_rs2_value;
+          Rk = 1;
+        end else begin
+          Rk = 0;
+          Qk = Qk_from_reg;
+        end
+      end else begin
+        Vk = Vk_from_reg;
+        Rk = 1;
+      end
 
       if (op_type >= `OP_LB && op_type <= `OP_SW) begin
         lsb_send_enable = 1;
         lsb_send_op = op_type;
-        lsb_send_Vj = Vj_from_reg;
-        lsb_send_Rj = Rj_from_reg;
-        lsb_send_Qj = Qj_from_reg;
-        lsb_send_Vk = Vk_from_reg;
-        lsb_send_Rk = Rk_from_reg;
-        lsb_send_Qk = Qk_from_reg;
+        lsb_send_Vj = Vj;
+        lsb_send_Rj = Rj;
+        lsb_send_Qj = Qj;
+        lsb_send_Vk = Vk;
+        lsb_send_Rk = Rk;
+        lsb_send_Qk = Qk;
         lsb_send_Imm = imm;
       end else begin
         rs_send_enable = 1;
         rs_send_op = op_type;
-        rs_send_Vj = Vj_from_reg;
-        rs_send_Rj = Rj_from_reg;
-        rs_send_Qj = Qj_from_reg;
-        rs_send_Vk = Vk_from_reg;
-        rs_send_Rk = Rk_from_reg;
-        rs_send_Qk = Qk_from_reg;
+        rs_send_Vj = Vj;
+        rs_send_Rj = Rj;
+        rs_send_Qj = Qj;
+        rs_send_Vk = Vk;
+        rs_send_Rk = Rk;
+        rs_send_Qk = Qk;
         rs_send_Imm = imm;
         rs_send_CurPc = pc_from_if;
       end

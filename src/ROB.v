@@ -36,6 +36,13 @@ module ROB (
   output reg                  lsb_begin_store,
   output reg [`ROB_LOG - 1:0] lsb_store_RobId,
 
+  input wire [`ROB_LOG - 1:0] issue_query_rs1,
+  input wire [`ROB_LOG - 1:0] issue_query_rs2,
+  output reg                  rs1_ready,
+  output reg [31:0]           rs1_value,
+  output reg                  rs2_ready,
+  output reg [31:0]           rs2_value,
+
   output reg                  rob_next_full,
   output reg [`ROB_LOG - 1:0] rob_next
 );
@@ -56,6 +63,23 @@ module ROB (
     rob_next_full = (tail + 2 & `ROB_SIZE - 1) == head;
     rob_next = tail + 1 & `ROB_SIZE - 1;
     isEmpty = head == tail;
+  end
+
+  always @(*) begin
+    if (isReady[issue_query_rs1]) begin
+      rs1_ready = 1;
+      rs1_value = Value[issue_query_rs1];
+    end else begin
+      rs1_ready = 0;
+      rs1_value = 0;
+    end
+    if (isReady[issue_query_rs2]) begin
+      rs2_ready = 1;
+      rs2_value = Value[issue_query_rs2];
+    end else begin
+      rs2_ready = 0;
+      rs2_value = 0;
+    end
   end
 
   always @(posedge clk) begin
