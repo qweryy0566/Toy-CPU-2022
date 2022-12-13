@@ -73,6 +73,12 @@ module Issue (
   assign rs2_to_reg = rs2;
 
   always @(*) begin
+    rs1_enable = 0;
+    rs2_enable = 0;
+    rob_send_enable = 0;
+    reg_send_enable = 0;
+    rs_send_enable = 0;
+    lsb_send_enable = 0;
     if (inst_valid) begin
       rs1_enable = 1;
       rs2_enable = 1;
@@ -108,12 +114,6 @@ module Issue (
         rs_send_Imm = imm;
         rs_send_CurPc = pc_from_if;
       end
-    end else begin
-      rs1_enable = 0;
-      rs2_enable = 0;
-      rob_send_enable = 0;
-      reg_send_enable = 0;
-      rs_send_enable = 0;
     end
   end
 endmodule

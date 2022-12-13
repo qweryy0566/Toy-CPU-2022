@@ -45,17 +45,19 @@ module MemCtrl (
       ic_enable <= `LOW;
       lsb_enable <= `LOW;
     end else begin
+      mem_wr <= `LOW;
       case (status)
         `STATUS_IDLE: begin
           ic_enable <= `LOW;
           lsb_enable <= `LOW;
-          mem_wr <= `LOW;
           if (lsb_valid) begin
-            if (lsb_wr_tag)
+            if (lsb_wr_tag) begin
               status <= `STATUS_STORE;
-            else
+              mem_a <= 0;
+            end else begin
               status <= `STATUS_LOAD;
-            mem_a <= lsb_addr;
+              mem_a <= lsb_addr;
+            end
             pos <= 0;
           end else if (ic_valid) begin
             status <= `STATUS_IF;
@@ -64,7 +66,7 @@ module MemCtrl (
             pos <= 0;
           end
         end
-        `STATUS_IF: begin
+        `STATUS_IF: if (ic_valid) begin
           case (pos)
             3'd1: inst_to_ic[7:0] <= mem_din;
             3'd2: inst_to_ic[15:8] <= mem_din;
@@ -78,9 +80,8 @@ module MemCtrl (
             pos <= pos + 1;
             mem_a <= mem_a + 1;
           end
-        end
-        `STATUS_LOAD: begin
-          mem_wr <= `LOW;
+        end else status <= `STATUS_IDLE;
+        `STATUS_LOAD: if (lsb_valid) begin
           case (pos)
             3'd1: lsb_load_data[7:0] <= mem_din;
             3'd2: lsb_load_data[15:8] <= mem_din;
@@ -94,23 +95,26 @@ module MemCtrl (
             pos <= pos + 1;
             mem_a <= mem_a + 1;
           end
-        end
-        `STATUS_STORE: begin
+        end else status <= `STATUS_IDLE;
+        `STATUS_STORE: if (lsb_valid) begin
           mem_wr <= `HIGH;
           case (pos)
-            3'd1: mem_dout <= lsb_store_data[7:0];
-            3'd2: mem_dout <= lsb_store_data[15:8];
-            3'd3: mem_dout <= lsb_store_data[23:16];
-            3'd4: mem_dout <= lsb_store_data[31:24]; 
+            3'd0: mem_dout <= lsb_store_data[7:0];
+            3'd1: mem_dout <= lsb_store_data[15:8];
+            3'd2: mem_dout <= lsb_store_data[23:16];
+            3'd3: mem_dout <= lsb_store_data[31:24]; 
           endcase
           if (pos == lsb_size) begin
+            mem_wr <= `LOW;
+            mem_a <= 0;
             status <= `STATUS_IDLE;
             lsb_enable <= `HIGH;
-          end else begin
+          end else  begin
             pos <= pos + 1;
-            mem_a <= mem_a + 1;
+            if (pos > 0) mem_a <= mem_a + 1;
+            else mem_a <= lsb_addr;
           end
-        end
+        end else status <= `STATUS_IDLE;
       endcase
     end
   end

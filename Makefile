@@ -3,7 +3,7 @@ prefix = $(shell pwd)
 src = $(prefix)/src
 testspace = $(prefix)/testspace
 
-sim_testcase = $(prefix)/testcase/sim
+sim_testcase = $(prefix)/testcase/
 fpga_testcase = $(prefix)/testcase/fpga
 
 sim = $(prefix)/sim

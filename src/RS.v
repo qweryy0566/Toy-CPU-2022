@@ -68,7 +68,7 @@ module RS (
       end else begin
         empty_pos = j;
       end
-    RS_next_full = cnt + 1 - has_ready <= `RS_SIZE;
+    RS_next_full = cnt + 1 - has_ready >= `RS_SIZE;
   end
 
   always @(posedge clk) begin
@@ -93,18 +93,18 @@ module RS (
         DestRob[empty_pos] <= issue_DestRob;
         CurPC[empty_pos] <= issue_CurPC;
       end
-      // now check if there i a ready instruction
+      // now check if there is a ready instruction
       if (~has_ready)
         FU_enable <= 0;
       else begin
         FU_enable <= 1;
-        FU_op <= OpType[has_ready];
-        FU_Vj <= Vj[has_ready];
-        FU_Vk <= Vk[has_ready];
-        FU_Imm <= Imm[has_ready];
-        FU_DestRob <= DestRob[has_ready];
-        FU_CurPC <= CurPC[has_ready];
-        isBusy[has_ready] <= 0;
+        FU_op <= OpType[ready_pos];
+        FU_Vj <= Vj[ready_pos];
+        FU_Vk <= Vk[ready_pos];
+        FU_Imm <= Imm[ready_pos];
+        FU_DestRob <= DestRob[ready_pos];
+        FU_CurPC <= CurPC[ready_pos];
+        isBusy[ready_pos] <= 0;
       end
       // now receive the result from the FU
       if (exc_valid) begin

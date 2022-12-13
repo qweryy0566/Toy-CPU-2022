@@ -99,8 +99,10 @@ module ROB (
               jump_flag <= 1;
               if_toPC <= ToPC[top_id];
             end
-          `OP_SB, `OP_SH, `OP_SW:
+          `OP_SB, `OP_SH, `OP_SW: begin
             lsb_begin_store <= 1;
+            lsb_store_RobId <= top_id;
+          end
           default: begin
             if (~ToPC[top_id] != 0) begin
               jump_flag <= 1;

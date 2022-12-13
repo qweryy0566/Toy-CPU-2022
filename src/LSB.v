@@ -139,9 +139,9 @@ module LSBuffer (
             isReady[i] <= `TRUE;
 
       B_enable <= `FALSE;
-      mem_enable <= `FALSE;
       if (isWaitingMem) begin
         if (mem_success) begin
+          mem_enable <= `FALSE;
           if (mem_wr_tag == `LOAD) begin
             B_enable <= `TRUE;
             B_RobId <= DestRob[top_id];
@@ -157,7 +157,7 @@ module LSBuffer (
           head <= top_id;
         end
       end else begin
-        if (Rj[top_id] && Rk[top_id]) begin
+        if (~isEmpty && Rj[top_id] && Rk[top_id]) begin
           case (OpType[top_id])
             `OP_LB, `OP_LBU: begin
               mem_enable <= `TRUE;
