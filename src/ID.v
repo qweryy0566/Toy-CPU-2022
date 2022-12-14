@@ -113,21 +113,20 @@ module InstDecode (
       7'b1100011: begin
         rs1 = inst[19:15];
         rs2 = inst[24:20];
-        imm = { {21{inst[31]}}, inst[7], inst[30:25], inst[11:8] };
+        imm = { {20{inst[31]}}, inst[7], inst[30:25], inst[11:8], 1'b0 };
         case (funct3)
-          3'b000: begin
-            case (funct7)
-              7'b0000000: op_type = `OP_BEQ;
-              7'b0000001: op_type = `OP_BNE;
-            endcase
-          end
-          3'b001: op_type = `OP_BGE;
+          3'b000: op_type = `OP_BEQ;
+          3'b001: op_type = `OP_BNE;
           3'b100: op_type = `OP_BLT;
-          3'b101: op_type = `OP_BGEU;
+          3'b101: op_type = `OP_BGE;
           3'b110: op_type = `OP_BLTU;
+          3'b111: op_type = `OP_BGEU;
         endcase
+         
       end
+       
     endcase
+     
   end
 endmodule
 

@@ -11,6 +11,7 @@ module ROB (
   input wire                  issue_valid,
   input wire [`OP_LOG - 1:0]  issue_op,
   input wire [4:0]            issue_dest,
+  input wire [31:0]           issue_pc,
 
   input wire                  exc_valid,
   input wire [31:0]           exc_value,
@@ -54,10 +55,12 @@ module ROB (
   reg[4:0]             DestReg[`ROB_SIZE - 1:0];
   reg[31:0]            Value[`ROB_SIZE - 1:0];
   reg[31:0]            ToPC[`ROB_SIZE - 1:0];
+  // for debugging
+  reg[31:0]            CurPC[`ROB_SIZE - 1:0];
 
 
   wire [4:0] top_id = head + 1 & `ROB_SIZE - 1;
-  integer i, j, cnt, empty_pos;
+  integer i, j, cnt, empty_pos, file_output;
 
   always @(*) begin
     rob_next_full = (tail + 2 & `ROB_SIZE - 1) == head;
@@ -98,6 +101,7 @@ module ROB (
         isReady[rob_next] <= 0;
         OpType[rob_next] <= issue_op;
         DestReg[rob_next] <= issue_dest;
+        CurPC[rob_next] <= issue_pc;
         tail <= rob_next;
       end
       if (exc_valid) begin

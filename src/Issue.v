@@ -40,6 +40,7 @@ module Issue (
   output reg                  rob_send_enable,
   output reg [`OP_LOG -1:0]   rob_send_op,
   output reg [4:0]            rob_send_dest,
+  output reg [31:0]           rob_send_pc,
 
   output reg                  reg_send_enable,
   output reg [4:0]            reg_send_index,
@@ -104,6 +105,7 @@ module Issue (
       rob_send_enable = 1;
       rob_send_op = op_type;
       rob_send_dest = rd;
+      rob_send_pc = pc_from_if;
 
       reg_send_enable = 1;
       reg_send_index = rd;

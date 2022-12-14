@@ -84,6 +84,7 @@ module cpu(
   wire                  issue_to_rob_valid;
   wire [`OP_LOG - 1:0]  issue_to_rob_op;
   wire [4:0]            issue_to_rob_dest;
+  wire [31:0]           issue_to_rob_pc;
   wire                  issue_to_reg_valid;
   wire [4:0]            issue_to_reg_id;
   wire                  issue_to_rs_valid;
@@ -232,6 +233,7 @@ module cpu(
     .rob_send_enable (issue_to_rob_valid),
     .rob_send_op     (issue_to_rob_op),
     .rob_send_dest   (issue_to_rob_dest),
+    .rob_send_pc     (issue_to_rob_pc),
     .reg_send_enable (issue_to_reg_valid),
     .reg_send_index  (issue_to_reg_id),
     .send_RobId      (issue_send_RobId),
@@ -319,6 +321,7 @@ module cpu(
     .issue_valid     (issue_to_rob_valid),
     .issue_op        (issue_to_rob_op),
     .issue_dest      (issue_to_rob_dest),
+    .issue_pc        (issue_to_rob_pc),
     .exc_valid       (fu_broadcast_valid),
     .exc_value       (fu_broadcast_value),
     .exc_toPC        (fu_broadcast_toPC),

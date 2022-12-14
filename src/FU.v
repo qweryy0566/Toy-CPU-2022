@@ -80,9 +80,9 @@ module FU (
         `OP_SLL:
           B_value = RS_Vj << RS_Vk[4:0];
         `OP_SLT:
-          B_value = $signed(RS_Vj) < $signed(RS_Vk);
+          B_value = $signed(RS_Vj) < $signed(RS_Vk) ? 1 : 0;
         `OP_SLTU:
-          B_value = RS_Vj < RS_Vk;
+          B_value = RS_Vj < RS_Vk ? 1 : 0;
         `OP_XOR:
           B_value = RS_Vj ^ RS_Vk;
         `OP_SRL:
