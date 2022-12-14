@@ -50,21 +50,22 @@ module MemCtrl (
         `STATUS_IDLE: begin
           ic_enable <= `LOW;
           lsb_enable <= `LOW;
-          if (lsb_valid) begin
-            if (lsb_wr_tag) begin
-              status <= `STATUS_STORE;
-              mem_a <= 0;
-            end else begin
-              status <= `STATUS_LOAD;
-              mem_a <= lsb_addr;
+          if (~ic_enable && ~lsb_enable)
+            if (lsb_valid) begin
+              if (lsb_wr_tag) begin
+                status <= `STATUS_STORE;
+                mem_a <= 0;
+              end else begin
+                status <= `STATUS_LOAD;
+                mem_a <= lsb_addr;
+              end
+              pos <= 0;
+            end else if (ic_valid) begin
+              status <= `STATUS_IF;
+              mem_a <= addr_from_ic;
+              mem_wr <= `LOW;
+              pos <= 0;
             end
-            pos <= 0;
-          end else if (ic_valid) begin
-            status <= `STATUS_IF;
-            mem_a <= addr_from_ic;
-            mem_wr <= `LOW;
-            pos <= 0;
-          end
         end
         `STATUS_IF: if (ic_valid) begin
           case (pos)

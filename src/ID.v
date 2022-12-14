@@ -89,6 +89,7 @@ module InstDecode (
         endcase
       end
       7'b0000011: begin
+        rd = inst[11:7];
         rs1 = inst[19:15];
         imm = { {21{inst[31]}}, inst[30:20] };
         case (funct3)
