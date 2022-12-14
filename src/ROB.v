@@ -143,6 +143,7 @@ module ROB (
           end
         endcase
         head <= head + 1 & `ROB_SIZE - 1; 
+        isReady[top_id] <= 0;
       end
     end
   end

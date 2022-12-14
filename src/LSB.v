@@ -66,7 +66,7 @@ module LSBuffer (
   reg [31:0]           Imm[`LSB_SIZE - 1:0];
   reg [`ROB_LOG - 1:0] DestRob[`LSB_SIZE - 1:0];
 
-  reg[`ROB_LOG - 1:0]  head, tail;
+  reg[`ROB_LOG - 1:0]  head, tail, lst_committed;
   wire                 isEmpty;
   wire [4:0]           top_id = head + 1 & `ROB_SIZE - 1;
   wire [4:0]           next = tail + 1 & `ROB_SIZE - 1;
@@ -104,29 +104,33 @@ module LSBuffer (
                                     : B_enable && B_RobId == issue_Qk ? 0 : issue_Qk;
 
   always @(posedge clk) begin
-    if (rst) begin
+    if (rst || jump_flag && lst_committed == head) begin
       head <= 0;
       tail <= 0;
+      lst_committed <= 0;
       isWaitingMem <= 0;
+      mem_enable <= 0;
       for (i = 0; i < `LSB_SIZE; i = i + 1) begin
         isReady[i] <= 0;
         isBusy[i] <= 0;
+        Rj[i] <= 0;
+        Rk[i] <= 0;
       end 
     end else if (~rdy) begin
       
     end else if (jump_flag) begin
-      if (~isEmpty && isReady[top_id])
-        tail <= top_id;
-      else
-        tail <= head;
-      for (i = 0; i < `LSB_SIZE; i = i + 1) begin
-        isBusy[i] <= 0;
-      end
-      if (isWaitingMem && (mem_success || ~isEmpty && OpType[top_id] < `OP_SB)) begin
+      tail <= lst_committed;
+      for (i = 0; i < `LSB_SIZE; i = i + 1) 
+        if (~isReady[i]) begin
+          isBusy[i] <= 0;
+          Rj[i] <= 0;
+          Rk[i] <= 0;
+        end
+      if (isWaitingMem && mem_success) begin
         isWaitingMem <= `FALSE;
         mem_enable <= `FALSE;
         head <= top_id;
-        tail <= top_id;
+        if (lst_committed < top_id) lst_committed <= top_id;
       end
     end else begin
       if (issue_valid) begin
@@ -171,15 +175,17 @@ module LSBuffer (
           end
 
       store_enable <= `FALSE;
-      if (OpType[top_id] >= `OP_SB && Rj[top_id] && Rk[top_id]) begin
+      if (~isEmpty && OpType[top_id] >= `OP_SB && Rj[top_id] && Rk[top_id]) begin
         store_enable <= `TRUE;
         store_RobId <= DestRob[top_id];
       end
 
       if (rob_committed)
         for (i = 0; i < `LSB_SIZE; i = i + 1)
-          if (DestRob[i] == rob_RobId)
+          if (isBusy[i] && DestRob[i] == rob_RobId) begin
             isReady[i] <= `TRUE;
+            lst_committed <= i;
+          end
 
       B_enable <= `FALSE;
       if (isWaitingMem) begin
@@ -198,6 +204,7 @@ module LSBuffer (
           end
           isWaitingMem <= `FALSE;
           head <= top_id;
+          if (lst_committed < top_id) lst_committed <= top_id;
           isBusy[top_id] <= `FALSE;
         end
       end else begin
