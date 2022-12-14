@@ -88,7 +88,7 @@ module RS (
       end else begin
         empty_pos = j;
       end
-    RS_next_full = cnt + 1 - has_ready >= `RS_SIZE;
+    RS_next_full = cnt + 1 >= `RS_SIZE;
   end
 
   always @(posedge clk) begin

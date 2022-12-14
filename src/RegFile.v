@@ -93,7 +93,7 @@ module RegFile (
         if (commit_dest)
           regFile[commit_dest] <= commit_value;
       end
-      if (rename_valid && issue_rd)
+      if (rename_valid && issue_rd != 0)
         reorder[issue_rd] = issue_RobId;
     end
   end

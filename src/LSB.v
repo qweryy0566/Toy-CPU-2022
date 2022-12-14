@@ -46,9 +46,15 @@ module LSBuffer (
   output reg                  store_enable,
   output reg [`ROB_LOG - 1:0] store_RobId,
 
+  // debug
+  output wire                 debug_out_bit,
+  output wire                 isReady_3,
+  output wire [`ROB_LOG - 1:0] debug_out_Q,
+
   output wire                 LSB_next_full
 );
 
+  reg                  isBusy[`LSB_SIZE - 1:0];
   reg                  isReady[`LSB_SIZE - 1:0];
   reg [`OP_LOG - 1:0]  OpType[`LSB_SIZE - 1:0];
   reg [31:0]           Vj[`LSB_SIZE - 1:0];
@@ -70,6 +76,12 @@ module LSBuffer (
   assign isEmpty = head == tail;
 
   reg                  isWaitingMem;
+
+  // debug
+  assign debug_out_bit = Rj[3];
+  assign debug_out_Q = Qj[3];
+  assign isReady_3 = isReady[3];
+
 
   // issue value should be updated from the broadcast value
   wire [31:0]           real_Vj = exc_valid && exc_RobId == issue_Qj
@@ -98,17 +110,28 @@ module LSBuffer (
       isWaitingMem <= 0;
       for (i = 0; i < `LSB_SIZE; i = i + 1) begin
         isReady[i] <= 0;
+        isBusy[i] <= 0;
       end 
     end else if (~rdy) begin
       
     end else if (jump_flag) begin
-      if (isWaitingMem)
+      if (~isEmpty && isReady[top_id])
         tail <= top_id;
       else
         tail <= head;
+      for (i = 0; i < `LSB_SIZE; i = i + 1) begin
+        isBusy[i] <= 0;
+      end
+      if (isWaitingMem && (mem_success || ~isEmpty && OpType[top_id] < `OP_SB)) begin
+        isWaitingMem <= `FALSE;
+        mem_enable <= `FALSE;
+        head <= top_id;
+        tail <= top_id;
+      end
     end else begin
       if (issue_valid) begin
-        isReady[next] <= issue_op < `OP_SB;
+        isBusy[next] <= 1;
+        isReady[next] <= 0;
         OpType[next] <= issue_op;
         Vj[next] <= real_Vj;
         Vk[next] <= real_Vk;
@@ -123,7 +146,7 @@ module LSBuffer (
       
       if (exc_valid)
         for (i = 0; i < `LSB_SIZE; i = i + 1)
-          if (~isReady[i]) begin
+          if (isBusy[i]) begin
             if (~Rj[i] && Qj[i] == exc_RobId) begin
               Rj[i] <= `TRUE;
               Vj[i] <= exc_value;
@@ -136,7 +159,7 @@ module LSBuffer (
 
       if (B_enable)
         for (i = 0; i < `LSB_SIZE; i = i + 1)
-          if (~isReady[i]) begin
+          if (isBusy[i]) begin
             if (~Rj[i] && Qj[i] == B_RobId) begin
               Rj[i] <= `TRUE;
               Vj[i] <= B_value;
@@ -175,6 +198,7 @@ module LSBuffer (
           end
           isWaitingMem <= `FALSE;
           head <= top_id;
+          isBusy[top_id] <= `FALSE;
         end
       end else begin
         if (~isEmpty && Rj[top_id] && Rk[top_id]) begin
