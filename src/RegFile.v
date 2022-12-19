@@ -29,6 +29,11 @@ module RegFile (
   input wire [4:0]             issue_rd,
   input wire [`ROB_LOG - 1:0]  issue_RobId,
 
+  output wire [31:0]           t0,
+  output wire [`ROB_LOG - 1:0] t0_rob,
+  output wire [31:0]           ra,
+  output wire [`ROB_LOG - 1:0] ra_rob,
+
   input wire                   jump_flag
 
 );
@@ -36,6 +41,10 @@ module RegFile (
   reg [31:0] regFile [31:0];
   reg [`ROB_LOG - 1:0] reorder[31:0];
   integer i;
+
+  // debug
+  assign t0 = regFile[5];
+  assign t0_rob = reorder[5];
 
   always @(*) begin
     if (rs1_valid) begin

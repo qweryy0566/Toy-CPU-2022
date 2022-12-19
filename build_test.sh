@@ -3,6 +3,7 @@ set -e
 prefix='/home/qweryy/toolchain/riscv'
 rpath=$prefix/bin/
 # clearing test dir
+
 rm -rf ./test
 mkdir ./test
 # compiling rom

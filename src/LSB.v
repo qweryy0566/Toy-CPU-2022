@@ -55,6 +55,7 @@ module LSBuffer (
 );
 
   reg                  isBusy[`LSB_SIZE - 1:0];
+  reg                  isSendToRob[`LSB_SIZE - 1:0];
   reg                  isReady[`LSB_SIZE - 1:0];
   reg [`OP_LOG - 1:0]  OpType[`LSB_SIZE - 1:0];
   reg [31:0]           Vj[`LSB_SIZE - 1:0];
@@ -113,6 +114,7 @@ module LSBuffer (
       for (i = 0; i < `LSB_SIZE; i = i + 1) begin
         isReady[i] <= 0;
         isBusy[i] <= 0;
+        isSendToRob[i] <= 0;
         Rj[i] <= 0;
         Rk[i] <= 0;
       end 
@@ -123,6 +125,7 @@ module LSBuffer (
       for (i = 0; i < `LSB_SIZE; i = i + 1) 
         if (~isReady[i]) begin
           isBusy[i] <= 0;
+          isSendToRob[i] <= 0;
           Rj[i] <= 0;
           Rk[i] <= 0;
         end
@@ -136,6 +139,7 @@ module LSBuffer (
       if (issue_valid) begin
         isBusy[next] <= 1;
         isReady[next] <= 0;
+        isSendToRob[next] <= 0;
         OpType[next] <= issue_op;
         Vj[next] <= real_Vj;
         Vk[next] <= real_Vk;
@@ -175,8 +179,9 @@ module LSBuffer (
           end
 
       store_enable <= `FALSE;
-      if (~isEmpty && OpType[top_id] >= `OP_SB && Rj[top_id] && Rk[top_id]) begin
+      if (~isEmpty && OpType[top_id] >= `OP_SB && Rj[top_id] && Rk[top_id] && !isSendToRob[top_id]) begin
         store_enable <= `TRUE;
+        isSendToRob[top_id] <= `TRUE;
         store_RobId <= DestRob[top_id];
       end
 
