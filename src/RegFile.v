@@ -29,26 +29,18 @@ module RegFile (
   input wire [4:0]             issue_rd,
   input wire [`ROB_LOG - 1:0]  issue_RobId,
 
-  output wire [31:0]           t0,
-  output wire [`ROB_LOG - 1:0] t0_rob,
-  output wire [31:0]           ra,
-  output wire [`ROB_LOG - 1:0] ra_rob,
-
   input wire                   jump_flag
 
 );
 
   reg [31:0] regFile [31:0];
   reg [`ROB_LOG - 1:0] reorder[31:0];
+  reg        isReorder[31:0]; // 超级大 bug, 原来一直用 reorder != 0 来判断是否重命名.
   integer i;
-
-  // debug
-  assign t0 = regFile[5];
-  assign t0_rob = reorder[5];
 
   always @(*) begin
     if (rs1_valid) begin
-      if (reorder[rs1] == 0) begin
+      if (~isReorder[rs1]) begin
         Vj_to_issue = regFile[rs1];
         Rj_to_issue = 1;
       end else if (commit_valid && commit_RobId == reorder[rs1]) begin
@@ -67,7 +59,7 @@ module RegFile (
 
   always @(*) begin
     if (rs2_valid) begin
-      if (reorder[rs2] == 0) begin
+      if (~isReorder[rs2]) begin
         Vk_to_issue = regFile[rs2];
         Rk_to_issue = 1;
       end else if (commit_valid && commit_RobId == reorder[rs2]) begin
@@ -89,21 +81,29 @@ module RegFile (
       for (i = 0; i < 32; i = i + 1) begin
         regFile[i] <= 0;
         reorder[i] <= 0;
+        isReorder[i] <= 0;
       end
     end else if (~rdy) begin
 
-    end else if (jump_flag) begin
-      for (i = 0; i < 32; i = i + 1)
-        reorder[i] <= 0;
     end else begin
       if (commit_valid) begin
-        if (commit_RobId == reorder[commit_dest])
+        if (isReorder[commit_dest] && commit_RobId == reorder[commit_dest]) begin
           reorder[commit_dest] <= 0;
-        if (commit_dest)
+          isReorder[commit_dest] <= 0;
+        end if (commit_dest != 0)
           regFile[commit_dest] <= commit_value;
       end
-      if (rename_valid && issue_rd != 0)
-        reorder[issue_rd] = issue_RobId;
+      if (jump_flag) begin
+        for (i = 0; i < 32; i = i + 1) begin
+          reorder[i] <= 0;
+          isReorder[i] <= 0;
+        end
+      end else begin
+        if (rename_valid && issue_rd != 0) begin
+          reorder[issue_rd] <= issue_RobId; // 原来写成组合 = 了。。。
+          isReorder[issue_rd] <= 1;
+        end
+      end
     end
   end
 

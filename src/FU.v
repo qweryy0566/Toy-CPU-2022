@@ -4,6 +4,7 @@
 `define __FU__
 
 module FU (
+  input wire                  jump_flag,
   input wire                  RS_valid,
   input wire [`OP_LOG - 1:0]  RS_op,
   input wire [31:0]           RS_Vj,
@@ -20,7 +21,7 @@ module FU (
 
   always @(*) begin
     B_enable = 0;
-    if (RS_valid && RS_op != `OP_NOP) begin
+    if (!jump_flag && RS_valid && RS_op != `OP_NOP) begin
       B_enable = 1;
       B_RobId = RS_DestRob;
       B_toPC = -1;
@@ -68,7 +69,7 @@ module FU (
         `OP_ANDI:
           B_value = RS_Vj & RS_Imm;
         `OP_SLLI:
-          B_value = RS_Vj << RS_Imm[4:0];
+          B_value = RS_Vj <<< RS_Imm[4:0];
         `OP_SRLI:
           B_value = RS_Vj >> RS_Imm[4:0];
         `OP_SRAI:
@@ -78,7 +79,7 @@ module FU (
         `OP_SUB:
           B_value = RS_Vj - RS_Vk;
         `OP_SLL:
-          B_value = RS_Vj << RS_Vk[4:0];
+          B_value = RS_Vj <<< RS_Vk[4:0];
         `OP_SLT:
           B_value = $signed(RS_Vj) < $signed(RS_Vk) ? 1 : 0;
         `OP_SLTU:

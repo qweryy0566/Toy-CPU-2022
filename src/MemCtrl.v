@@ -108,6 +108,7 @@ module MemCtrl (
           if (pos == lsb_size) begin
             mem_wr <= `LOW;
             mem_a <= 0;
+            mem_dout <= 0;
             status <= `STATUS_IDLE;
             lsb_enable <= `HIGH;
           end else  begin

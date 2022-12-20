@@ -65,7 +65,7 @@ module RS (
   wire                  real_Rk = exc_valid && exc_RobId == issue_Qk 
                                     ? 1
                                     : LSB_valid && LSB_RobId == issue_Qk ? 1 : issue_Rk;
-  wire [`ROB_LOG - 1:0] real_Qj = exc_valid && exc_RobId == issue_Qk 
+  wire [`ROB_LOG - 1:0] real_Qj = exc_valid && exc_RobId == issue_Qj 
                                     ? 0
                                     : LSB_valid && LSB_RobId == issue_Qj ? 0 : issue_Qj;
   wire [`ROB_LOG - 1:0] real_Qk = exc_valid && exc_RobId == issue_Qk 
@@ -95,6 +95,8 @@ module RS (
     if (rst || jump_flag) begin
       for (i = 0; i < `RS_SIZE; i = i + 1) begin
         isBusy[i] <= 0;
+        Rj[i] <= 0;
+        Rk[i] <= 0;
       end
       FU_enable <= 0;
     end else if (~rdy) begin

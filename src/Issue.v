@@ -30,7 +30,9 @@ module Issue (
   // else
   //   send.Vj = reg_in[inst.rs1], send.Qj = 0;
   output reg [`ROB_LOG - 1:0] check_rob_rs1,
+  output reg                  check_rob_rs1_enable,
   output reg [`ROB_LOG - 1:0] check_rob_rs2,
+  output reg                  check_rob_rs2_enable,
   input wire                  rob_rs1_ready,
   input wire                  rob_rs2_ready,
   input wire [31:0]           rob_rs1_value,
@@ -94,6 +96,8 @@ module Issue (
   always @(*) begin
     rs1_enable = 0;
     rs2_enable = 0;
+    check_rob_rs1_enable = 0;
+    check_rob_rs2_enable = 0;
     rob_send_enable = 0;
     reg_send_enable = 0;
     rs_send_enable = 0;
@@ -101,6 +105,8 @@ module Issue (
     if (inst_valid) begin
       rs1_enable = 1;
       rs2_enable = 1;
+      check_rob_rs1_enable = 1;
+      check_rob_rs2_enable = 1;
 
       rob_send_enable = 1;
       rob_send_op = op_type;

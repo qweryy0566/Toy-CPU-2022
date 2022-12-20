@@ -38,7 +38,9 @@ module ROB (
   output reg [`ROB_LOG - 1:0] lsb_store_RobId,
 
   input wire [`ROB_LOG - 1:0] issue_query_rs1,
+  input wire                  issue_query_rs1_valid,
   input wire [`ROB_LOG - 1:0] issue_query_rs2,
+  input wire                  issue_query_rs2_valid,
   output reg                  rs1_ready,
   output reg [31:0]           rs1_value,
   output reg                  rs2_ready,
@@ -58,7 +60,6 @@ module ROB (
   // for debugging
   reg[31:0]            CurPC[`ROB_SIZE - 1:0];
 
-
   wire [4:0] top_id = head + 1 & `ROB_SIZE - 1;
   integer i, j, cnt, empty_pos, file_output;
 
@@ -69,15 +70,15 @@ module ROB (
   end
 
   always @(*) begin
-    if (isReady[issue_query_rs1]) begin
-      rs1_ready = 1;
+    if (issue_query_rs1_valid) begin
+      rs1_ready = isReady[issue_query_rs1];
       rs1_value = Value[issue_query_rs1];
     end else begin
       rs1_ready = 0;
       rs1_value = 0;
     end
-    if (isReady[issue_query_rs2]) begin
-      rs2_ready = 1;
+    if (issue_query_rs2_valid) begin
+      rs2_ready = isReady[issue_query_rs2];
       rs2_value = Value[issue_query_rs2];
     end else begin
       rs2_ready = 0;
@@ -94,6 +95,8 @@ module ROB (
         ToPC[i] <= -1;
       end 
       jump_flag <= 0;
+      reg_enable <= 0;
+      lsb_begin_store <= 0;
     end else if (~rdy) begin
 
     end else begin

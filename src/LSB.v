@@ -46,11 +46,6 @@ module LSBuffer (
   output reg                  store_enable,
   output reg [`ROB_LOG - 1:0] store_RobId,
 
-  // debug
-  output wire                 debug_out_bit,
-  output wire                 isReady_3,
-  output wire [`ROB_LOG - 1:0] debug_out_Q,
-
   output wire                 LSB_next_full
 );
 
@@ -97,7 +92,7 @@ module LSBuffer (
   wire                  real_Rk = exc_valid && exc_RobId == issue_Qk 
                                     ? 1
                                     : B_enable && B_RobId == issue_Qk ? 1 : issue_Rk;
-  wire [`ROB_LOG - 1:0] real_Qj = exc_valid && exc_RobId == issue_Qk 
+  wire [`ROB_LOG - 1:0] real_Qj = exc_valid && exc_RobId == issue_Qj 
                                     ? 0
                                     : B_enable && B_RobId == issue_Qj ? 0 : issue_Qj;
   wire [`ROB_LOG - 1:0] real_Qk = exc_valid && exc_RobId == issue_Qk 
@@ -105,6 +100,8 @@ module LSBuffer (
                                     : B_enable && B_RobId == issue_Qk ? 0 : issue_Qk;
 
   always @(posedge clk) begin
+    B_enable <= `FALSE;
+    store_enable <= `FALSE;
     if (rst || jump_flag && lst_committed == head) begin
       head <= 0;
       tail <= 0;
@@ -123,7 +120,7 @@ module LSBuffer (
     end else if (jump_flag) begin
       tail <= lst_committed;
       for (i = 0; i < `LSB_SIZE; i = i + 1) 
-        if (~isReady[i]) begin
+        if (~isBusy[i] || ~isReady[i]) begin
           isBusy[i] <= 0;
           isSendToRob[i] <= 0;
           Rj[i] <= 0;
@@ -133,7 +130,12 @@ module LSBuffer (
         isWaitingMem <= `FALSE;
         mem_enable <= `FALSE;
         head <= top_id;
-        if (lst_committed < top_id) lst_committed <= top_id;
+        if (lst_committed == head) lst_committed <= top_id;
+        isBusy[top_id] <= `FALSE;
+        isReady[top_id] <= `FALSE;
+        isSendToRob[top_id] <= `FALSE;
+        Rj[top_id] <= `FALSE;
+        Rk[top_id] <= `FALSE;
       end
     end else begin
       if (issue_valid) begin
@@ -178,7 +180,6 @@ module LSBuffer (
             end
           end
 
-      store_enable <= `FALSE;
       if (~isEmpty && OpType[top_id] >= `OP_SB && Rj[top_id] && Rk[top_id] && !isSendToRob[top_id]) begin
         store_enable <= `TRUE;
         isSendToRob[top_id] <= `TRUE;
@@ -192,11 +193,9 @@ module LSBuffer (
             lst_committed <= i;
           end
 
-      B_enable <= `FALSE;
       if (isWaitingMem) begin
         if (mem_success) begin
-          mem_enable <= `FALSE;
-          if (mem_wr_tag == `LOAD) begin
+          if (mem_wr_tag == `LOAD && mem_enable) begin
             B_enable <= `TRUE;
             B_RobId <= DestRob[top_id];
             case (OpType[top_id])
@@ -207,10 +206,14 @@ module LSBuffer (
               `OP_LHU: B_value <= {{16{1'b0}}, mem_rdata[15:0]};
             endcase
           end
+          mem_enable <= `FALSE;
           isWaitingMem <= `FALSE;
           head <= top_id;
-          if (lst_committed < top_id) lst_committed <= top_id;
+          if (lst_committed == head) lst_committed <= top_id;
           isBusy[top_id] <= `FALSE;
+          isReady[top_id] <= `FALSE;
+          Rj[top_id] <= `FALSE;
+          Rk[top_id] <= `FALSE;
         end
       end else begin
         if (~isEmpty && Rj[top_id] && Rk[top_id]) begin

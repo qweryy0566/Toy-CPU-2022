@@ -69,7 +69,9 @@ module cpu(
   wire [4:0]            issue_to_reg_rs1_id;
   wire                  issue_to_reg_rs2_valid;
   wire [4:0]            issue_to_reg_rs2_id;
+  wire                  issue_to_rob_rs1_valid;
   wire [`ROB_LOG - 1:0] issue_to_rob_rs1_RobId;
+  wire                  issue_to_rob_rs2_valid;
   wire [`ROB_LOG - 1:0] issue_to_rob_rs2_RobId;
   wire                  rob_to_issue_rs1_ready;
   wire [31:0]           rob_to_issue_rs1_value;
@@ -196,6 +198,7 @@ module cpu(
   );
 
   FU u_FU(
+    .jump_flag  (jump_flag),
   	.RS_valid   (rs_to_fu_valid),
     .RS_op      (rs_to_fu_op),
     .RS_Vj      (rs_to_fu_Vj),
@@ -218,7 +221,9 @@ module cpu(
     .rs2_enable      (issue_to_reg_rs2_valid),
     .rs2_to_reg      (issue_to_reg_rs2_id),
     .check_rob_rs1   (issue_to_rob_rs1_RobId),
+    .check_rob_rs1_enable (issue_to_rob_rs1_valid),
     .check_rob_rs2   (issue_to_rob_rs2_RobId),
+    .check_rob_rs2_enable (issue_to_rob_rs2_valid),
     .rob_rs1_ready   (rob_to_issue_rs1_ready),
     .rob_rs1_value   (rob_to_issue_rs1_value),
     .rob_rs2_ready   (rob_to_issue_rs2_ready),
@@ -340,7 +345,9 @@ module cpu(
     .lsb_begin_store (rob_to_lsb_valid),
     .lsb_store_RobId (rob_to_lsb_RobId),
     .issue_query_rs1 (issue_to_rob_rs1_RobId),
+    .issue_query_rs1_valid (issue_to_rob_rs1_valid),
     .issue_query_rs2 (issue_to_rob_rs2_RobId),
+    .issue_query_rs2_valid (issue_to_rob_rs2_valid),
     .rs1_ready       (rob_to_issue_rs1_ready),
     .rs1_value       (rob_to_issue_rs1_value),
     .rs2_ready       (rob_to_issue_rs2_ready),
