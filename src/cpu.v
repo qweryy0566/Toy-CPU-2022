@@ -42,6 +42,9 @@ module cpu(
 // - 0x30004 read: read clocks passed since cpu starts (in dword, 4 bytes)
 // - 0x30004 write: indicates program stop (will output '\0' through uart tx)
   wire           jump_flag;
+  wire           update_pred_valid;
+  wire [31:0]    update_pred_pc;
+  wire           update_pred_need_jump;
 
   wire           ic_to_mem_valid;
   wire [31:0]    ic_to_mem_addr;
@@ -54,6 +57,7 @@ module cpu(
   wire           if_to_issue_valid;
   wire [31:0]    if_to_issue_inst;
   wire [31:0]    if_to_issue_pc;
+  wire           if_to_issue_pred;
   wire [31:0]    rob_to_if_pc;
 
   wire           lsb_to_mem_valid;
@@ -87,6 +91,7 @@ module cpu(
   wire [`OP_LOG - 1:0]  issue_to_rob_op;
   wire [4:0]            issue_to_rob_dest;
   wire [31:0]           issue_to_rob_pc;
+  wire                  issue_to_rob_pred;
   wire                  issue_to_reg_valid;
   wire [4:0]            issue_to_reg_id;
   wire                  issue_to_rs_valid;
@@ -135,6 +140,7 @@ module cpu(
   wire                  lsb_to_rob_store_valid;
   wire [`ROB_LOG - 1:0] lsb_to_rob_store_RobId;
 
+  wire [`ROB_LOG - 1:0] rob_top_id;
   wire [`ROB_LOG - 1:0] rob_next;
   wire                  rob_next_full;
   wire                  rs_next_full;
@@ -190,15 +196,20 @@ module cpu(
     .inst_send_enable (if_to_issue_valid),
     .inst_to_issue    (if_to_issue_inst),
     .pc_to_issue      (if_to_issue_pc),
+    .pred_to_issue    (if_to_issue_pred),
     .jump_flag        (jump_flag        ),
     .target_pc        (rob_to_if_pc),
     .rob_next_full    (rob_next_full),
     .rs_next_full     (rs_next_full),
-    .lsb_next_full    (lsb_next_full)
+    .lsb_next_full    (lsb_next_full),
+    .upd_pred_valid   (update_pred_valid),
+    .upd_pred_pc      (update_pred_pc),
+    .upd_pred_need_jump(update_pred_need_jump)
   );
 
   FU u_FU(
-    .jump_flag  (jump_flag),
+    .rst        (rst_in),
+    .rdy        (rdy_in),
   	.RS_valid   (rs_to_fu_valid),
     .RS_op      (rs_to_fu_op),
     .RS_Vj      (rs_to_fu_Vj),
@@ -213,9 +224,12 @@ module cpu(
   );
 
   Issue u_Issue(
+    .rst             (rst_in),
+    .rdy             (rdy_in),
     .inst_valid      (if_to_issue_valid),
     .inst_from_if    (if_to_issue_inst),
     .pc_from_if      (if_to_issue_pc),
+    .pred_from_if    (if_to_issue_pred),
     .rs1_enable      (issue_to_reg_rs1_valid),
     .rs1_to_reg      (issue_to_reg_rs1_id),
     .rs2_enable      (issue_to_reg_rs2_valid),
@@ -239,6 +253,7 @@ module cpu(
     .rob_send_op     (issue_to_rob_op),
     .rob_send_dest   (issue_to_rob_dest),
     .rob_send_pc     (issue_to_rob_pc),
+    .rob_send_pred   (issue_to_rob_pred),
     .reg_send_enable (issue_to_reg_valid),
     .reg_send_index  (issue_to_reg_id),
     .send_RobId      (issue_send_RobId),
@@ -327,6 +342,7 @@ module cpu(
     .issue_op        (issue_to_rob_op),
     .issue_dest      (issue_to_rob_dest),
     .issue_pc        (issue_to_rob_pc),
+    .issue_pred      (issue_to_rob_pred),
     .exc_valid       (fu_broadcast_valid),
     .exc_value       (fu_broadcast_value),
     .exc_toPC        (fu_broadcast_toPC),
@@ -342,6 +358,9 @@ module cpu(
     .reg_value       (rob_to_reg_value),
     .jump_flag       (jump_flag       ),
     .if_toPC         (rob_to_if_pc),
+    .update_pred_enable (update_pred_valid),
+    .update_pred_pc  (update_pred_pc),
+    .update_pred_need_jump (update_pred_need_jump),
     .lsb_begin_store (rob_to_lsb_valid),
     .lsb_store_RobId (rob_to_lsb_RobId),
     .issue_query_rs1 (issue_to_rob_rs1_RobId),
@@ -353,7 +372,8 @@ module cpu(
     .rs2_ready       (rob_to_issue_rs2_ready),
     .rs2_value       (rob_to_issue_rs2_value),
     .rob_next_full   (rob_next_full   ),
-    .rob_next        (rob_next        )
+    .rob_next        (rob_next        ),
+    .rob_top_id      (rob_top_id      )
   );
 
   LSBuffer u_LSBuffer(
@@ -361,6 +381,7 @@ module cpu(
     .rst           (rst_in        ),
     .rdy           (rdy_in        ),
     .jump_flag     (jump_flag     ),
+    .rob_top_id    (rob_top_id    ),
     .issue_valid   (issue_to_lsb_valid),
     .issue_op      (issue_to_lsb_op),
     .issue_Vj      (issue_to_lsb_Vj),

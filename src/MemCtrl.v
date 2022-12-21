@@ -41,7 +41,7 @@ module MemCtrl (
       lsb_enable <= `LOW;
     end else if (~rdy) begin
       mem_wr <= `LOW;
-      status <= `STATUS_IDLE; 
+      mem_a <= 0;
       ic_enable <= `LOW;
       lsb_enable <= `LOW;
     end else begin
@@ -97,7 +97,7 @@ module MemCtrl (
             mem_a <= mem_a + 1;
           end
         end else status <= `STATUS_IDLE;
-        `STATUS_STORE: if (lsb_valid) begin
+        `STATUS_STORE: if (lsb_addr[17:16] != 2'b11 || ~io_buffer_full) begin
           mem_wr <= `HIGH;
           case (pos)
             3'd0: mem_dout <= lsb_store_data[7:0];
@@ -108,15 +108,14 @@ module MemCtrl (
           if (pos == lsb_size) begin
             mem_wr <= `LOW;
             mem_a <= 0;
-            mem_dout <= 0;
             status <= `STATUS_IDLE;
             lsb_enable <= `HIGH;
-          end else  begin
+          end else begin
             pos <= pos + 1;
             if (pos > 0) mem_a <= mem_a + 1;
             else mem_a <= lsb_addr;
           end
-        end else status <= `STATUS_IDLE;
+        end
       endcase
     end
   end

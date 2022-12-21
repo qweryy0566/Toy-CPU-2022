@@ -39,9 +39,7 @@ module ICache (
         valid[i << 2 | 3] <= `FALSE;
       end
     end else if (~rdy) begin
-      isBusy <= `FALSE;
-      inst_enable <= `LOW;
-      addr_enable <= `LOW;
+
     end else begin
       if (if_valid) begin
         if (hit) begin

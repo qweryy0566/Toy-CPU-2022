@@ -122,11 +122,8 @@ module InstDecode (
           3'b110: op_type = `OP_BLTU;
           3'b111: op_type = `OP_BGEU;
         endcase
-         
       end
-       
     endcase
-     
   end
 endmodule
 

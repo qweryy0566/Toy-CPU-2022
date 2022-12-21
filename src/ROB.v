@@ -12,6 +12,7 @@ module ROB (
   input wire [`OP_LOG - 1:0]  issue_op,
   input wire [4:0]            issue_dest,
   input wire [31:0]           issue_pc,
+  input wire                  issue_pred,
 
   input wire                  exc_valid,
   input wire [31:0]           exc_value,
@@ -33,6 +34,9 @@ module ROB (
   
   output reg                  jump_flag,
   output reg [31:0]           if_toPC,
+  output reg                  update_pred_enable,
+  output reg [31:0]           update_pred_pc,
+  output reg                  update_pred_need_jump,
 
   output reg                  lsb_begin_store,
   output reg [`ROB_LOG - 1:0] lsb_store_RobId,
@@ -47,7 +51,8 @@ module ROB (
   output reg [31:0]           rs2_value,
 
   output reg                  rob_next_full,
-  output reg [`ROB_LOG - 1:0] rob_next
+  output reg [`ROB_LOG - 1:0] rob_next,
+  output wire [`ROB_LOG - 1:0] rob_top_id
 );
 
   reg[`ROB_LOG - 1:0]  head, tail;
@@ -57,11 +62,18 @@ module ROB (
   reg[4:0]             DestReg[`ROB_SIZE - 1:0];
   reg[31:0]            Value[`ROB_SIZE - 1:0];
   reg[31:0]            ToPC[`ROB_SIZE - 1:0];
+  reg                  Pred[`ROB_SIZE - 1:0];
   // for debugging
   reg[31:0]            CurPC[`ROB_SIZE - 1:0];
 
+  // integer logfile;
+  // initial begin
+  //   logfile = $fopen("ROB.log", "w");
+  // end
+
   wire [4:0] top_id = head + 1 & `ROB_SIZE - 1;
-  integer i, j, cnt, empty_pos, file_output;
+  integer i, j, cnt, empty_pos;
+  assign rob_top_id = top_id;
 
   always @(*) begin
     rob_next_full = (tail + 2 & `ROB_SIZE - 1) == head;
@@ -93,10 +105,12 @@ module ROB (
       for (i = 0; i < `ROB_SIZE; i = i + 1) begin
         isReady[i] <= 0;
         ToPC[i] <= -1;
+        Value[i] <= 0;
       end 
       jump_flag <= 0;
       reg_enable <= 0;
       lsb_begin_store <= 0;
+      update_pred_enable <= 0;
     end else if (~rdy) begin
 
     end else begin
@@ -105,6 +119,8 @@ module ROB (
         OpType[rob_next] <= issue_op;
         DestReg[rob_next] <= issue_dest;
         CurPC[rob_next] <= issue_pc;
+        Pred[rob_next] <= issue_pred;
+        ToPC[rob_next] <= -1;
         tail <= rob_next;
       end
       if (exc_valid) begin
@@ -123,13 +139,19 @@ module ROB (
       jump_flag <= 0;
       reg_enable <= 0;
       lsb_begin_store <= 0;
+      update_pred_enable <= 0;
       if (~isEmpty && isReady[top_id]) begin
+        // $fdisplay(logfile, "commit: %h %h; %d <- %d", CurPC[top_id], OpType[top_id], DestReg[top_id], $signed(Value[top_id]));
         case (OpType[top_id])
-          `OP_BEQ, `OP_BNE, `OP_BLT, `OP_BGE, `OP_BLTU, `OP_BGEU:
-            if (~ToPC[top_id] != 0) begin
+          `OP_BEQ, `OP_BNE, `OP_BLT, `OP_BGE, `OP_BLTU, `OP_BGEU: begin
+            update_pred_enable <= 1;
+            update_pred_pc <= CurPC[top_id];
+            update_pred_need_jump <= Value[top_id] == 1;
+            if (Value[top_id] == 1 ^ Pred[top_id]) begin
               jump_flag <= 1;
               if_toPC <= ToPC[top_id];
             end
+          end
           `OP_SB, `OP_SH, `OP_SW: begin
             lsb_begin_store <= 1;
             lsb_store_RobId <= top_id;

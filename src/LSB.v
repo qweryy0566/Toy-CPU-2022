@@ -9,6 +9,7 @@ module LSBuffer (
   input wire         rdy,
 
   input wire                  jump_flag,
+  input wire [`ROB_LOG - 1:0] rob_top_id,
 
   input wire                  issue_valid,
   input wire [`OP_LOG - 1:0]  issue_op,
@@ -65,19 +66,15 @@ module LSBuffer (
   reg[`ROB_LOG - 1:0]  head, tail, lst_committed;
   wire                 isEmpty;
   wire [4:0]           top_id = head + 1 & `ROB_SIZE - 1;
+  wire [31:0]          top_addr = Vj[top_id] + Imm[top_id];
   wire [4:0]           next = tail + 1 & `ROB_SIZE - 1;
+
   integer i, j, cnt, empty_pos;
 
   assign LSB_next_full = (tail + 2 & `ROB_SIZE - 1) == head;
   assign isEmpty = head == tail;
 
   reg                  isWaitingMem;
-
-  // debug
-  assign debug_out_bit = Rj[3];
-  assign debug_out_Q = Qj[3];
-  assign isReady_3 = isReady[3];
-
 
   // issue value should be updated from the broadcast value
   wire [31:0]           real_Vj = exc_valid && exc_RobId == issue_Qj
@@ -216,7 +213,9 @@ module LSBuffer (
           Rk[top_id] <= `FALSE;
         end
       end else begin
-        if (~isEmpty && Rj[top_id] && Rk[top_id]) begin
+        // Input 操作需要等到其成为 ROB 的 top 项才能开始
+        if (~isEmpty && Rj[top_id] && Rk[top_id]
+            && (!(top_addr[17:16] == 2'b11 && OpType[top_id] < `OP_SB) || DestRob[top_id] == rob_top_id)) begin
           case (OpType[top_id])
             `OP_LB, `OP_LBU: begin
               mem_enable <= `TRUE;

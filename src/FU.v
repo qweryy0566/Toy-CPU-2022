@@ -4,7 +4,8 @@
 `define __FU__
 
 module FU (
-  input wire                  jump_flag,
+  input wire                  rst,
+  input wire                  rdy,
   input wire                  RS_valid,
   input wire [`OP_LOG - 1:0]  RS_op,
   input wire [31:0]           RS_Vj,
@@ -21,7 +22,7 @@ module FU (
 
   always @(*) begin
     B_enable = 0;
-    if (!jump_flag && RS_valid && RS_op != `OP_NOP) begin
+    if (~rst && rdy && RS_valid && RS_op != `OP_NOP) begin
       B_enable = 1;
       B_RobId = RS_DestRob;
       B_toPC = -1;
@@ -39,23 +40,53 @@ module FU (
           B_toPC = RS_Vj + RS_Imm & 32'hFFFFFFFE;
         end
         `OP_BEQ:
-          if (RS_Vj == RS_Vk)
+          if (RS_Vj == RS_Vk) begin
             B_toPC = RS_CurPC + RS_Imm;
+            B_value = 1;
+          end else begin
+            B_toPC = RS_CurPC + 4;
+            B_value = 0;
+          end
         `OP_BNE:
-          if (RS_Vj != RS_Vk)
+          if (RS_Vj != RS_Vk) begin
             B_toPC = RS_CurPC + RS_Imm;
+            B_value = 1;
+          end else begin
+            B_toPC = RS_CurPC + 4;
+            B_value = 0;
+          end
         `OP_BLT:
-          if ($signed(RS_Vj) < $signed(RS_Vk))
+          if ($signed(RS_Vj) < $signed(RS_Vk)) begin
             B_toPC = RS_CurPC + RS_Imm;
+            B_value = 1;
+          end else begin
+            B_toPC = RS_CurPC + 4;
+            B_value = 0;
+          end
         `OP_BGE:
-          if ($signed(RS_Vj) >= $signed(RS_Vk))
+          if ($signed(RS_Vj) >= $signed(RS_Vk)) begin
             B_toPC = RS_CurPC + RS_Imm;
+            B_value = 1;
+          end else begin
+            B_toPC = RS_CurPC + 4;
+            B_value = 0;
+          end
         `OP_BLTU:
-          if (RS_Vj < RS_Vk)
+          if (RS_Vj < RS_Vk) begin
             B_toPC = RS_CurPC + RS_Imm;
+            B_value = 1;
+          end else begin
+            B_toPC = RS_CurPC + 4;
+            B_value = 0;
+          end
         `OP_BGEU:
-          if (RS_Vj >= RS_Vk)
+          if (RS_Vj >= RS_Vk) begin
             B_toPC = RS_CurPC + RS_Imm;
+            B_value = 1;
+          end else begin
+            B_toPC = RS_CurPC + 4;
+            B_value = 0;
+          end
         `OP_ADDI:
           B_value = RS_Vj + RS_Imm;
         `OP_SLTI:

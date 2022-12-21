@@ -60,3 +60,5 @@
 `define STATUS_IF 2'b01
 `define STATUS_LOAD 2'b10
 `define STATUS_STORE 2'b11
+
+`define PRED_SIZE 256

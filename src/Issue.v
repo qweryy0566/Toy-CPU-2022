@@ -5,9 +5,12 @@
 `define __ISSUE__
 
 module Issue (
+  input wire         rst,
+  input wire         rdy,
   input wire         inst_valid,
   input wire [31:0]  inst_from_if,
   input wire [31:0]  pc_from_if,
+  input wire         pred_from_if,
 
   // RegFile
   output reg                  rs1_enable,
@@ -43,6 +46,7 @@ module Issue (
   output reg [`OP_LOG -1:0]   rob_send_op,
   output reg [4:0]            rob_send_dest,
   output reg [31:0]           rob_send_pc,
+  output reg                  rob_send_pred,
 
   output reg                  reg_send_enable,
   output reg [4:0]            reg_send_index,
@@ -74,9 +78,9 @@ module Issue (
   wire [4:0]           rd, rs1, rs2;
   wire [31:0]          imm;
 
-  reg [5:0] issue_op;
-  reg [4:0] issue_rd, issue_rs1, issue_rs2;
-  reg [31:0] issue_imm;
+  reg [5:0]            issue_op;
+  reg [4:0]            issue_rd, issue_rs1, issue_rs2;
+  reg [31:0]           issue_imm;
   reg [31:0]           Vj, Vk;
   reg                  Rj, Rk;
   reg [`ROB_LOG - 1:0] Qj, Qk;
@@ -102,7 +106,7 @@ module Issue (
     reg_send_enable = 0;
     rs_send_enable = 0;
     lsb_send_enable = 0;
-    if (inst_valid) begin
+    if (~rst && rdy && inst_valid) begin
       rs1_enable = 1;
       rs2_enable = 1;
       check_rob_rs1_enable = 1;
@@ -112,6 +116,7 @@ module Issue (
       rob_send_op = op_type;
       rob_send_dest = rd;
       rob_send_pc = pc_from_if;
+      rob_send_pred = pred_from_if;
 
       reg_send_enable = 1;
       reg_send_index = rd;

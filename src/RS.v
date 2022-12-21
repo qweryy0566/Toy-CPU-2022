@@ -100,7 +100,7 @@ module RS (
       end
       FU_enable <= 0;
     end else if (~rdy) begin
-      FU_enable <= 0;
+
     end else begin
       if (issue_valid) begin
         isBusy[empty_pos] <= 1;
