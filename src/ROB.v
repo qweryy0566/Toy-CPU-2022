@@ -74,7 +74,9 @@ module ROB (
   wire [`ROB_LOG - 1:0] top_id = head + 1 & `ROB_SIZE - 1;
   assign rob_top_id = top_id;
   assign rob_next = tail + 1 & `ROB_SIZE - 1;
-  assign rob_next_full = tail >= head ? tail - head >= `ROB_SIZE - 2 : tail + `ROB_SIZE - head >= `ROB_SIZE - 2;
+  assign rob_next_full = tail >= head
+      ? tail - head + issue_valid - (~isEmpty && isReady[top_id]) >= `ROB_SIZE - 1
+      : tail + `ROB_SIZE - head + issue_valid - (~isEmpty && isReady[top_id]) >= `ROB_SIZE - 1;
 
   assign rs1_ready = isReady[issue_query_rs1];
   assign rs1_value = Value[issue_query_rs1];
