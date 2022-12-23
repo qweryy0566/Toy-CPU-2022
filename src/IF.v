@@ -8,7 +8,6 @@ module InstFetch (
   input wire          rst,
   input wire					rdy,
 
-  output wire        pc_send_enable,
   output wire [31:0] pc_to_ic,
 
   input wire         inst_get_ready,  // hit
@@ -31,16 +30,13 @@ module InstFetch (
   input wire         upd_pred_need_jump
 );
   reg [31:0] pc;
-  reg        isBusy;
   reg [1:0]  predCnt[`PRED_SIZE - 1:0];
   integer    i;
 
   assign pc_to_ic = pc;
-  assign pc_send_enable = isBusy;
 
   always @(posedge clk) begin
     if (rst) begin
-      isBusy <= `FALSE;
       pc <= 0;
       inst_send_enable <= `LOW;
       inst_to_issue <= 0;
@@ -63,34 +59,25 @@ module InstFetch (
 
       if (jump_flag) begin
         pc <= target_pc;
-        isBusy <= `FALSE;
         inst_send_enable <= `LOW;
       end else if (rob_next_full || rs_next_full || lsb_next_full) begin
         inst_send_enable <= `LOW;
       end else begin
-        if (isBusy) begin
-          if (inst_get_ready) begin
-            inst_send_enable <= `HIGH;
-            inst_to_issue <= inst_from_ic;
-            pc_to_issue <= pc;
-            isBusy <= `FALSE;
-            if (inst_from_ic[6:0] == 7'b1100011 && predCnt[pc & `PRED_SIZE - 1] >= 2'b10) begin
-              pc <= pc + { {20{inst_from_ic[31]}}, inst_from_ic[7], inst_from_ic[30:25], inst_from_ic[11:8], 1'b0 };
-              pred_to_issue <= `TRUE;
-            end else begin
-              pc <= pc + 4;
-              pred_to_issue <= `FALSE;
-            end
+        if (inst_get_ready) begin
+          inst_send_enable <= `HIGH;
+          inst_to_issue <= inst_from_ic;
+          pc_to_issue <= pc;
+          if (inst_from_ic[6:0] == 7'b1100011 && predCnt[pc & `PRED_SIZE - 1] >= 2'b10) begin
+            pc <= pc + { {20{inst_from_ic[31]}}, inst_from_ic[7], inst_from_ic[30:25], inst_from_ic[11:8], 1'b0 };
+            pred_to_issue <= `TRUE;
           end else begin
-            inst_send_enable <= `LOW;
+            pc <= pc + 4;
+            pred_to_issue <= `FALSE;
           end
         end else begin
-          isBusy <= `TRUE;
           inst_send_enable <= `LOW;
         end
       end
-      if (inst_send_enable)
-        inst_send_enable <= `LOW;
     end
   end
   

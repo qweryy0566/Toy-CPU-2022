@@ -5,12 +5,12 @@
 `define __ISSUE__
 
 module Issue (
-  input wire         rst,
-  input wire         rdy,
-  input wire         inst_valid,
-  input wire [31:0]  inst_from_if,
-  input wire [31:0]  pc_from_if,
-  input wire         pred_from_if,
+  input wire                   rst,
+  input wire                   rdy,
+  input wire                   inst_valid,
+  input wire [31:0]            inst_from_if,
+  input wire [31:0]            pc_from_if,
+  input wire                   pred_from_if,
 
   input wire                   exc_valid,
   input wire [`ROB_LOG - 1:0]  exc_RobId,

@@ -8,7 +8,6 @@ module ICache (
   input wire         rst,
   input wire         rdy,
 
-  input wire         if_valid,
   input wire [31:0]  pc_from_if,
 
   output wire        inst_enable,  // hit
@@ -27,7 +26,7 @@ module ICache (
   reg [31:0]   data  [`CacheEntries - 1:0];
 
   wire hit = valid[pc_from_if[9:2]] && tag[pc_from_if[9:2]] == pc_from_if[17:10];
-  assign inst_enable = if_valid && hit || mem_valid && addr_to_mem == pc_from_if;
+  assign inst_enable = hit || mem_valid && addr_to_mem == pc_from_if;
   assign inst_to_if  = hit ? data[pc_from_if[9:2]] : inst_from_mem;
 
   always @(posedge clk) begin
@@ -51,7 +50,7 @@ module ICache (
           addr_enable <= `LOW;
           isBusy <= `FALSE;
         end
-      end else if (if_valid && ~hit) begin
+      end else if (~hit) begin
         isBusy <= `TRUE;
         addr_enable <= `HIGH;
         addr_to_mem <= pc_from_if;

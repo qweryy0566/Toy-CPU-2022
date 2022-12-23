@@ -28,6 +28,7 @@ module MemCtrl (
   output reg [31:0] lsb_load_data
 );
 
+  
   reg [2:0] pos;
   reg [1:0] status;
   always @(posedge clk) begin

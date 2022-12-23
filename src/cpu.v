@@ -50,7 +50,6 @@ module cpu(
   wire [31:0]    ic_to_mem_addr;
   wire           mem_to_ic_valid;
   wire [31:0]    mem_to_ic_inst;
-  wire           if_to_ic_valid;
   wire [31:0]    if_to_ic_pc;
   wire           ic_to_if_valid;
   wire [31:0]    ic_to_if_inst;
@@ -154,13 +153,11 @@ module cpu(
     .lsb_enable     (mem_to_lsb_valid),
     .lsb_load_data  (mem_to_lsb_load_data)
   );
-  
 
   ICache icache(
     .clk           (clk_in),
     .rst           (rst_in),
     .rdy           (rdy_in),
-    .if_valid      (if_to_ic_valid),
     .pc_from_if    (if_to_ic_pc),
     .inst_enable   (ic_to_if_valid),
     .inst_to_if    (ic_to_if_inst),
@@ -174,7 +171,6 @@ module cpu(
   	.clk              (clk_in           ),
     .rst              (rst_in           ),
     .rdy              (rdy_in           ),
-    .pc_send_enable   (if_to_ic_valid),
     .pc_to_ic         (if_to_ic_pc),
     .inst_get_ready   (ic_to_if_valid),
     .inst_from_ic     (ic_to_if_inst),

@@ -68,13 +68,12 @@ module LSBuffer (
   wire [`LSB_LOG - 1:0] top_id = head + 1 & `LSB_SIZE - 1;
   wire [31:0]           top_addr = Vj[top_id] + Imm[top_id];
   wire [`LSB_LOG - 1:0] next = tail + 1 & `LSB_SIZE - 1;
+  reg                   isWaitingMem;
 
-  integer i, j, cnt, empty_pos;
+  integer i;
 
-  assign LSB_next_full = (tail + 2 & `LSB_SIZE - 1) == head;
   assign isEmpty = head == tail;
-
-  reg                  isWaitingMem;
+  assign LSB_next_full = tail >= head ? tail - head >= `LSB_SIZE - 2 : tail + `LSB_SIZE - head >= `LSB_SIZE - 2;
 
   always @(posedge clk) begin
     B_enable <= `FALSE;

@@ -49,13 +49,13 @@ module ROB (
   output wire                 rs2_ready,
   output wire [31:0]          rs2_value,
 
-  output reg                  rob_next_full,
-  output reg [`ROB_LOG - 1:0] rob_next,
+  output wire                  rob_next_full,
+  output wire [`ROB_LOG - 1:0] rob_next,
   output wire [`ROB_LOG - 1:0] rob_top_id
 );
 
   reg[`ROB_LOG - 1:0]  head, tail;
-  reg                  isEmpty;
+  wire                 isEmpty = head == tail;
   reg                  isReady[`ROB_SIZE - 1:0];
   reg [`OP_LOG - 1:0]  OpType[`ROB_SIZE - 1:0];
   reg[4:0]             DestReg[`ROB_SIZE - 1:0];
@@ -64,6 +64,7 @@ module ROB (
   reg                  Pred[`ROB_SIZE - 1:0];
   // for debugging
   reg[31:0]            CurPC[`ROB_SIZE - 1:0];
+  integer              i;
 
   // integer logfile;
   // initial begin
@@ -71,14 +72,9 @@ module ROB (
   // end
 
   wire [`ROB_LOG - 1:0] top_id = head + 1 & `ROB_SIZE - 1;
-  integer i, j, cnt, empty_pos;
   assign rob_top_id = top_id;
-
-  always @(*) begin
-    rob_next_full = (tail + 2 & `ROB_SIZE - 1) == head;
-    rob_next = tail + 1 & `ROB_SIZE - 1;
-    isEmpty = head == tail;
-  end
+  assign rob_next = tail + 1 & `ROB_SIZE - 1;
+  assign rob_next_full = tail >= head ? tail - head >= `ROB_SIZE - 2 : tail + `ROB_SIZE - head >= `ROB_SIZE - 2;
 
   assign rs1_ready = isReady[issue_query_rs1];
   assign rs1_value = Value[issue_query_rs1];

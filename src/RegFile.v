@@ -11,12 +11,12 @@ module RegFile (
   input wire [4:0]   rs1,
   input wire [4:0]   rs2,
 
-  output reg [31:0]            Vj_to_issue,
-  output reg                   Rj_to_issue,
-  output reg [`ROB_LOG - 1:0]  Qj_to_issue,
-  output reg [31:0]            Vk_to_issue,
-  output reg                   Rk_to_issue,
-  output reg [`ROB_LOG - 1:0]  Qk_to_issue,
+  output wire [31:0]           Vj_to_issue,
+  output wire                  Rj_to_issue,
+  output wire [`ROB_LOG - 1:0] Qj_to_issue,
+  output wire [31:0]           Vk_to_issue,
+  output wire                  Rk_to_issue,
+  output wire [`ROB_LOG - 1:0] Qk_to_issue,
 
   input wire                   commit_valid,
   input wire [4:0]             commit_dest,
@@ -33,32 +33,16 @@ module RegFile (
 
   reg [31:0] regFile [31:0];
   reg [`ROB_LOG - 1:0] reorder[31:0];
-  reg        isReorder[31:0]; // 超级�? bug, 原来�?直用 reorder != 0 来判断是否重命名.
+  reg        isReorder[31:0]; // 超级大 bug, 原来是直接用 reorder != 0 来判断是否重命名.
   integer i;
 
-  always @(*) begin
-    if (isReorder[rs1] && commit_valid && commit_RobId == reorder[rs1]) begin
-      Vj_to_issue = commit_value;
-      Rj_to_issue = 1;
-      Qj_to_issue = 0;
-    end else begin
-      Vj_to_issue = regFile[rs1];
-      Rj_to_issue = ~isReorder[rs1];
-      Qj_to_issue = reorder[rs1];
-    end
-  end
+  assign Vj_to_issue = isReorder[rs1] && commit_valid && commit_RobId == reorder[rs1] ? commit_value : regFile[rs1];
+  assign Rj_to_issue = isReorder[rs1] && commit_valid && commit_RobId == reorder[rs1] || ~isReorder[rs1];
+  assign Qj_to_issue = reorder[rs1];
 
-  always @(*) begin
-    if (isReorder[rs2] && commit_valid && commit_RobId == reorder[rs2]) begin
-      Vk_to_issue = commit_value;
-      Rk_to_issue = 1;
-      Qk_to_issue = 0;
-    end else begin
-      Vk_to_issue = regFile[rs2];
-      Rk_to_issue = ~isReorder[rs2];
-      Qk_to_issue = reorder[rs2];
-    end
-  end
+  assign Vk_to_issue = isReorder[rs2] && commit_valid && commit_RobId == reorder[rs2] ? commit_value : regFile[rs2];
+  assign Rk_to_issue = isReorder[rs2] && commit_valid && commit_RobId == reorder[rs2] || ~isReorder[rs2];
+  assign Qk_to_issue = reorder[rs2];
 
   always @(posedge clk) begin
     if (rst) begin
@@ -84,7 +68,7 @@ module RegFile (
         end
       end else begin
         if (rename_valid && issue_rd != 0) begin
-          reorder[issue_rd] <= issue_RobId; // 原来写成组合 = 了�?��?��??
+          reorder[issue_rd] <= issue_RobId; // 原来写成组合 = 了。。
           isReorder[issue_rd] <= 1;
         end
       end
