@@ -63,38 +63,18 @@ module LSBuffer (
   reg [31:0]           Imm[`LSB_SIZE - 1:0];
   reg [`ROB_LOG - 1:0] DestRob[`LSB_SIZE - 1:0];
 
-  reg[`ROB_LOG - 1:0]  head, tail, lst_committed;
-  wire                 isEmpty;
-  wire [4:0]           top_id = head + 1 & `ROB_SIZE - 1;
-  wire [31:0]          top_addr = Vj[top_id] + Imm[top_id];
-  wire [4:0]           next = tail + 1 & `ROB_SIZE - 1;
+  reg[`LSB_LOG - 1:0]   head, tail, lst_committed;
+  wire                  isEmpty;
+  wire [`LSB_LOG - 1:0] top_id = head + 1 & `LSB_SIZE - 1;
+  wire [31:0]           top_addr = Vj[top_id] + Imm[top_id];
+  wire [`LSB_LOG - 1:0] next = tail + 1 & `LSB_SIZE - 1;
 
   integer i, j, cnt, empty_pos;
 
-  assign LSB_next_full = (tail + 2 & `ROB_SIZE - 1) == head;
+  assign LSB_next_full = (tail + 2 & `LSB_SIZE - 1) == head;
   assign isEmpty = head == tail;
 
   reg                  isWaitingMem;
-
-  // issue value should be updated from the broadcast value
-  wire [31:0]           real_Vj = exc_valid && exc_RobId == issue_Qj
-                                    ? exc_value
-                                    : B_enable && B_RobId == issue_Qj ? B_value : issue_Vj;
-  wire [31:0]           real_Vk = exc_valid && exc_RobId == issue_Qk
-                                    ? exc_value
-                                    : B_enable && B_RobId == issue_Qk ? B_value : issue_Vk;
-  wire                  real_Rj = exc_valid && exc_RobId == issue_Qj 
-                                    ? 1
-                                    : B_enable && B_RobId == issue_Qj ? 1 : issue_Rj;
-  wire                  real_Rk = exc_valid && exc_RobId == issue_Qk 
-                                    ? 1
-                                    : B_enable && B_RobId == issue_Qk ? 1 : issue_Rk;
-  wire [`ROB_LOG - 1:0] real_Qj = exc_valid && exc_RobId == issue_Qj 
-                                    ? 0
-                                    : B_enable && B_RobId == issue_Qj ? 0 : issue_Qj;
-  wire [`ROB_LOG - 1:0] real_Qk = exc_valid && exc_RobId == issue_Qk 
-                                    ? 0
-                                    : B_enable && B_RobId == issue_Qk ? 0 : issue_Qk;
 
   always @(posedge clk) begin
     B_enable <= `FALSE;
@@ -140,12 +120,12 @@ module LSBuffer (
         isReady[next] <= 0;
         isSendToRob[next] <= 0;
         OpType[next] <= issue_op;
-        Vj[next] <= real_Vj;
-        Vk[next] <= real_Vk;
-        Rj[next] <= real_Rj;
-        Rk[next] <= real_Rk;
-        Qj[next] <= real_Qj;
-        Qk[next] <= real_Qk;
+        Vj[next] <= issue_Vj;
+        Vk[next] <= issue_Vk;
+        Rj[next] <= issue_Rj;
+        Rk[next] <= issue_Rk;
+        Qj[next] <= issue_Qj;
+        Qk[next] <= issue_Qk;
         Imm[next] <= issue_Imm;
         DestRob[next] <= issue_DestRob;
         tail <= next;

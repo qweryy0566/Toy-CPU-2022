@@ -8,9 +8,7 @@ module RegFile (
   input wire         rst,
   input wire         rdy,
 
-  input wire         rs1_valid,
   input wire [4:0]   rs1,
-  input wire         rs2_valid,
   input wire [4:0]   rs2,
 
   output reg [31:0]            Vj_to_issue,
@@ -35,44 +33,30 @@ module RegFile (
 
   reg [31:0] regFile [31:0];
   reg [`ROB_LOG - 1:0] reorder[31:0];
-  reg        isReorder[31:0]; // 超级大 bug, 原来一直用 reorder != 0 来判断是否重命名.
+  reg        isReorder[31:0]; // 超级�? bug, 原来�?直用 reorder != 0 来判断是否重命名.
   integer i;
 
   always @(*) begin
-    if (rs1_valid) begin
-      if (~isReorder[rs1]) begin
-        Vj_to_issue = regFile[rs1];
-        Rj_to_issue = 1;
-      end else if (commit_valid && commit_RobId == reorder[rs1]) begin
-        Vj_to_issue = commit_value;
-        Rj_to_issue = 1;
-      end else begin
-        Rj_to_issue = 0;
-        Qj_to_issue = reorder[rs1];
-      end
-    end else begin
-      Vj_to_issue = 0;
-      Rj_to_issue = 0;
+    if (isReorder[rs1] && commit_valid && commit_RobId == reorder[rs1]) begin
+      Vj_to_issue = commit_value;
+      Rj_to_issue = 1;
       Qj_to_issue = 0;
+    end else begin
+      Vj_to_issue = regFile[rs1];
+      Rj_to_issue = ~isReorder[rs1];
+      Qj_to_issue = reorder[rs1];
     end
   end
 
   always @(*) begin
-    if (rs2_valid) begin
-      if (~isReorder[rs2]) begin
-        Vk_to_issue = regFile[rs2];
-        Rk_to_issue = 1;
-      end else if (commit_valid && commit_RobId == reorder[rs2]) begin
-        Vk_to_issue = commit_value;
-        Rk_to_issue = 1;
-      end else begin
-        Rk_to_issue = 0;
-        Qk_to_issue = reorder[rs2];
-      end
-    end else begin
-      Vk_to_issue = 0;
-      Rk_to_issue = 0;
+    if (isReorder[rs2] && commit_valid && commit_RobId == reorder[rs2]) begin
+      Vk_to_issue = commit_value;
+      Rk_to_issue = 1;
       Qk_to_issue = 0;
+    end else begin
+      Vk_to_issue = regFile[rs2];
+      Rk_to_issue = ~isReorder[rs2];
+      Qk_to_issue = reorder[rs2];
     end
   end
 
@@ -100,7 +84,7 @@ module RegFile (
         end
       end else begin
         if (rename_valid && issue_rd != 0) begin
-          reorder[issue_rd] <= issue_RobId; // 原来写成组合 = 了。。。
+          reorder[issue_rd] <= issue_RobId; // 原来写成组合 = 了�?��?��??
           isReorder[issue_rd] <= 1;
         end
       end

@@ -42,13 +42,12 @@ module ROB (
   output reg [`ROB_LOG - 1:0] lsb_store_RobId,
 
   input wire [`ROB_LOG - 1:0] issue_query_rs1,
-  input wire                  issue_query_rs1_valid,
   input wire [`ROB_LOG - 1:0] issue_query_rs2,
-  input wire                  issue_query_rs2_valid,
-  output reg                  rs1_ready,
-  output reg [31:0]           rs1_value,
-  output reg                  rs2_ready,
-  output reg [31:0]           rs2_value,
+
+  output wire                 rs1_ready,
+  output wire [31:0]          rs1_value,
+  output wire                 rs2_ready,
+  output wire [31:0]          rs2_value,
 
   output reg                  rob_next_full,
   output reg [`ROB_LOG - 1:0] rob_next,
@@ -71,7 +70,7 @@ module ROB (
   //   logfile = $fopen("ROB.log", "w");
   // end
 
-  wire [4:0] top_id = head + 1 & `ROB_SIZE - 1;
+  wire [`ROB_LOG - 1:0] top_id = head + 1 & `ROB_SIZE - 1;
   integer i, j, cnt, empty_pos;
   assign rob_top_id = top_id;
 
@@ -81,22 +80,10 @@ module ROB (
     isEmpty = head == tail;
   end
 
-  always @(*) begin
-    if (issue_query_rs1_valid) begin
-      rs1_ready = isReady[issue_query_rs1];
-      rs1_value = Value[issue_query_rs1];
-    end else begin
-      rs1_ready = 0;
-      rs1_value = 0;
-    end
-    if (issue_query_rs2_valid) begin
-      rs2_ready = isReady[issue_query_rs2];
-      rs2_value = Value[issue_query_rs2];
-    end else begin
-      rs2_ready = 0;
-      rs2_value = 0;
-    end
-  end
+  assign rs1_ready = isReady[issue_query_rs1];
+  assign rs1_value = Value[issue_query_rs1];
+  assign rs2_ready = isReady[issue_query_rs2];
+  assign rs2_value = Value[issue_query_rs2];
 
   always @(posedge clk) begin
     if (rst || jump_flag) begin

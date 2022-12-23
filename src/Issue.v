@@ -12,10 +12,15 @@ module Issue (
   input wire [31:0]  pc_from_if,
   input wire         pred_from_if,
 
+  input wire                   exc_valid,
+  input wire [`ROB_LOG - 1:0]  exc_RobId,
+  input wire [31:0]            exc_value,
+  input wire                   LSB_valid,
+  input wire [`ROB_LOG - 1:0]  LSB_RobId,
+  input wire [31:0]            LSB_value,
+
   // RegFile
-  output reg                  rs1_enable,
   output wire [4:0]           rs1_to_reg,
-  output reg                  rs2_enable,
   output wire [4:0]           rs2_to_reg,
   input wire [31:0]           Vj_from_reg,
   input wire                  Rj_from_reg,
@@ -32,10 +37,6 @@ module Issue (
   //     send.Qj = reg_in.Reorder(inst.rs1);
   // else
   //   send.Vj = reg_in[inst.rs1], send.Qj = 0;
-  output reg [`ROB_LOG - 1:0] check_rob_rs1,
-  output reg                  check_rob_rs1_enable,
-  output reg [`ROB_LOG - 1:0] check_rob_rs2,
-  output reg                  check_rob_rs2_enable,
   input wire                  rob_rs1_ready,
   input wire                  rob_rs2_ready,
   input wire [31:0]           rob_rs1_value,
@@ -54,64 +55,50 @@ module Issue (
   output reg [`ROB_LOG - 1:0] send_RobId,
 
   output reg                  rs_send_enable,
-  output reg [`OP_LOG - 1:0]  rs_send_op,
-  output reg [31:0]           rs_send_Vj,
-  output reg                  rs_send_Rj,
-  output reg [`ROB_LOG - 1:0] rs_send_Qj,
-  output reg [31:0]           rs_send_Vk,
-  output reg                  rs_send_Rk,
-  output reg [`ROB_LOG - 1:0] rs_send_Qk,
-  output reg [31:0]           rs_send_Imm,
-  output reg [31:0]           rs_send_CurPc,
+  output wire [`OP_LOG - 1:0] op_type,
+  output wire [31:0]           Vj,
+  output wire [31:0]           Vk,
+  output wire                  Rj,
+  output wire                  Rk,
+  output wire [`ROB_LOG - 1:0] Qj,
+  output wire [`ROB_LOG - 1:0] Qk,
+  output wire [31:0]          imm,
+  output wire [31:0]          CurPc,
 
-  output reg                  lsb_send_enable,
-  output reg [`OP_LOG - 1:0]  lsb_send_op,
-  output reg [31:0]           lsb_send_Vj,
-  output reg                  lsb_send_Rj,
-  output reg [`ROB_LOG - 1:0] lsb_send_Qj,
-  output reg [31:0]           lsb_send_Vk,
-  output reg                  lsb_send_Rk,
-  output reg [`ROB_LOG - 1:0] lsb_send_Qk,
-  output reg [31:0]           lsb_send_Imm
+  output reg                  lsb_send_enable
 );
-  wire [`OP_LOG - 1:0] op_type;
-  wire [4:0]           rd, rs1, rs2;
-  wire [31:0]          imm;
-
-  reg [5:0]            issue_op;
-  reg [4:0]            issue_rd, issue_rs1, issue_rs2;
-  reg [31:0]           issue_imm;
-  reg [31:0]           Vj, Vk;
-  reg                  Rj, Rk;
-  reg [`ROB_LOG - 1:0] Qj, Qk;
+  wire [4:0]           rd;
 
   InstDecode inst_decode (
     .inst(inst_from_if),
     .op_type(op_type),
     .rd(rd),
-    .rs1(rs1),
-    .rs2(rs2),
+    .rs1(rs1_to_reg),
+    .rs2(rs2_to_reg),
     .imm(imm)
   );
 
-  assign rs1_to_reg = rs1;
-  assign rs2_to_reg = rs2;
+  assign CurPc = pc_from_if;
+  assign Qj = Qj_from_reg;
+  assign Qk = Qk_from_reg;
+  assign Vj = Rj_from_reg ? Vj_from_reg : rob_rs1_ready ? rob_rs1_value : exc_valid && exc_RobId == Qj_from_reg ? exc_value : LSB_value;
+  assign Rj = Rj_from_reg || rob_rs1_ready || (exc_valid && exc_RobId == Qj_from_reg) || (LSB_valid && LSB_RobId == Qj_from_reg);
+  assign Vk = Rk_from_reg ? Vk_from_reg : rob_rs2_ready ? rob_rs2_value : exc_valid && exc_RobId == Qk_from_reg ? exc_value : LSB_value;
+  assign Rk = Rk_from_reg || rob_rs2_ready || (exc_valid && exc_RobId == Qk_from_reg) || (LSB_valid && LSB_RobId == Qk_from_reg);
 
   always @(*) begin
-    rs1_enable = 0;
-    rs2_enable = 0;
-    check_rob_rs1_enable = 0;
-    check_rob_rs2_enable = 0;
     rob_send_enable = 0;
+    rob_send_op = 0;
+    rob_send_pc = 0;
+    rob_send_dest = 0;
+    rob_send_pred = 0;
     reg_send_enable = 0;
     rs_send_enable = 0;
     lsb_send_enable = 0;
-    if (~rst && rdy && inst_valid) begin
-      rs1_enable = 1;
-      rs2_enable = 1;
-      check_rob_rs1_enable = 1;
-      check_rob_rs2_enable = 1;
+    send_RobId = 0;
+    reg_send_index = 0;
 
+    if (~rst && rdy && inst_valid) begin
       rob_send_enable = 1;
       rob_send_op = op_type;
       rob_send_dest = rd;
@@ -122,58 +109,15 @@ module Issue (
       reg_send_index = rd;
       
       send_RobId = rob_next;
-      
-      if (~Rj_from_reg) begin
-        check_rob_rs1 = Qj_from_reg;
-        if (rob_rs1_ready) begin
-          Vj = rob_rs1_value;
-          Rj = 1;
-        end else begin
-          Rj = 0;
-          Qj = Qj_from_reg;
-        end
-      end else begin
-        Vj = Vj_from_reg;
-        Rj = 1;
-      end
-      if (~Rk_from_reg) begin
-        check_rob_rs2 = Qk_from_reg;
-        if (rob_rs2_ready) begin
-          Vk = rob_rs2_value;
-          Rk = 1;
-        end else begin
-          Rk = 0;
-          Qk = Qk_from_reg;
-        end
-      end else begin
-        Vk = Vk_from_reg;
-        Rk = 1;
-      end
 
       if (op_type >= `OP_LB && op_type <= `OP_SW) begin
         lsb_send_enable = 1;
-        lsb_send_op = op_type;
-        lsb_send_Vj = Vj;
-        lsb_send_Rj = Rj;
-        lsb_send_Qj = Qj;
-        lsb_send_Vk = Vk;
-        lsb_send_Rk = Rk;
-        lsb_send_Qk = Qk;
-        lsb_send_Imm = imm;
       end else begin
         rs_send_enable = 1;
-        rs_send_op = op_type;
-        rs_send_Vj = Vj;
-        rs_send_Rj = Rj;
-        rs_send_Qj = Qj;
-        rs_send_Vk = Vk;
-        rs_send_Rk = Rk;
-        rs_send_Qk = Qk;
-        rs_send_Imm = imm;
-        rs_send_CurPc = pc_from_if;
       end
     end
   end
+
 endmodule
 
 `endif

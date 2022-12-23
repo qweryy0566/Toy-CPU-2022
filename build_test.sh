@@ -14,7 +14,7 @@ ${rpath}riscv32-unknown-elf-gcc -o ./test/test.o -I ./sys -c ./test/test.c -O2 -
 # linking
 ${rpath}riscv32-unknown-elf-ld -T ./sys/memory.ld ./sys/rom.o ./test/test.o -L $prefix/riscv32-unknown-elf/lib/ -L $prefix/lib/gcc/riscv32-unknown-elf/10.1.0/ -lc -lgcc -lm -lnosys -o ./test/test.om
 # converting to verilog format
-${rpath}riscv32-unknown-elf-objcopy -O verilog ./test/test.om ./test/test.data
+${rpath}riscv32-unknown-elf-objcopy -O verilog ./test/test.om ./test.data
 # converting to binary format(for ram uploading)
 ${rpath}riscv32-unknown-elf-objcopy -O binary ./test/test.om ./test/test.bin
 # decompile (for debugging)

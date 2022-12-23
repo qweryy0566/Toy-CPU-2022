@@ -22,10 +22,12 @@ module FU (
 
   always @(*) begin
     B_enable = 0;
+    B_RobId = 0;
+    B_value = 0;
+    B_toPC = -1;
     if (~rst && rdy && RS_valid && RS_op != `OP_NOP) begin
       B_enable = 1;
       B_RobId = RS_DestRob;
-      B_toPC = -1;
       case (RS_op)
         `OP_LUI:
           B_value = RS_Imm;

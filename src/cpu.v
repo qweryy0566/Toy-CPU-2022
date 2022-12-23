@@ -69,14 +69,8 @@ module cpu(
   wire [31:0]    mem_to_lsb_load_data;
 
   wire [`ROB_LOG - 1:0] issue_send_RobId;
-  wire                  issue_to_reg_rs1_valid;
   wire [4:0]            issue_to_reg_rs1_id;
-  wire                  issue_to_reg_rs2_valid;
   wire [4:0]            issue_to_reg_rs2_id;
-  wire                  issue_to_rob_rs1_valid;
-  wire [`ROB_LOG - 1:0] issue_to_rob_rs1_RobId;
-  wire                  issue_to_rob_rs2_valid;
-  wire [`ROB_LOG - 1:0] issue_to_rob_rs2_RobId;
   wire                  rob_to_issue_rs1_ready;
   wire [31:0]           rob_to_issue_rs1_value;
   wire                  rob_to_issue_rs2_ready;
@@ -95,24 +89,16 @@ module cpu(
   wire                  issue_to_reg_valid;
   wire [4:0]            issue_to_reg_id;
   wire                  issue_to_rs_valid;
-  wire [`OP_LOG - 1:0]  issue_to_rs_op;
-  wire [31:0]           issue_to_rs_Vj; 
-  wire [31:0]           issue_to_rs_Vk;
-  wire                  issue_to_rs_Rj;
-  wire                  issue_to_rs_Rk;
-  wire [`ROB_LOG - 1:0] issue_to_rs_Qj;
-  wire [`ROB_LOG - 1:0] issue_to_rs_Qk;
-  wire [31:0]           issue_to_rs_Imm;
-  wire [31:0]           issue_to_rs_CurPc;
+  wire [`OP_LOG - 1:0]  issue_op;
+  wire [31:0]           issue_Vj; 
+  wire [31:0]           issue_Vk;
+  wire                  issue_Rj;
+  wire                  issue_Rk;
+  wire [`ROB_LOG - 1:0] issue_Qj;
+  wire [`ROB_LOG - 1:0] issue_Qk;
+  wire [31:0]           issue_Imm;
+  wire [31:0]           issue_CurPc;
   wire                  issue_to_lsb_valid;
-  wire [`OP_LOG - 1:0]  issue_to_lsb_op;
-  wire [31:0]           issue_to_lsb_Vj; 
-  wire [31:0]           issue_to_lsb_Vk;
-  wire                  issue_to_lsb_Rj;
-  wire                  issue_to_lsb_Rk;
-  wire [`ROB_LOG - 1:0] issue_to_lsb_Qj;
-  wire [`ROB_LOG - 1:0] issue_to_lsb_Qk;
-  wire [31:0]           issue_to_lsb_Imm;
 
   wire                  rs_to_fu_valid;
   wire [`OP_LOG - 1:0]  rs_to_fu_op;
@@ -166,8 +152,7 @@ module cpu(
     .lsb_size       (lsb_to_mem_size),
     .lsb_wr_tag     (lsb_to_mem_wr_tag),
     .lsb_enable     (mem_to_lsb_valid),
-    .lsb_load_data  (mem_to_lsb_load_data),
-    .jump_flag      (jump_flag      )
+    .lsb_load_data  (mem_to_lsb_load_data)
   );
   
 
@@ -230,14 +215,14 @@ module cpu(
     .inst_from_if    (if_to_issue_inst),
     .pc_from_if      (if_to_issue_pc),
     .pred_from_if    (if_to_issue_pred),
-    .rs1_enable      (issue_to_reg_rs1_valid),
+    .exc_valid      (fu_broadcast_valid),
+    .exc_value      (fu_broadcast_value),
+    .exc_RobId      (fu_broadcast_RobId),
+    .LSB_valid      (lsb_broadcast_valid),
+    .LSB_value      (lsb_broadcast_value),
+    .LSB_RobId      (lsb_broadcast_RobId),
     .rs1_to_reg      (issue_to_reg_rs1_id),
-    .rs2_enable      (issue_to_reg_rs2_valid),
     .rs2_to_reg      (issue_to_reg_rs2_id),
-    .check_rob_rs1   (issue_to_rob_rs1_RobId),
-    .check_rob_rs1_enable (issue_to_rob_rs1_valid),
-    .check_rob_rs2   (issue_to_rob_rs2_RobId),
-    .check_rob_rs2_enable (issue_to_rob_rs2_valid),
     .rob_rs1_ready   (rob_to_issue_rs1_ready),
     .rob_rs1_value   (rob_to_issue_rs1_value),
     .rob_rs2_ready   (rob_to_issue_rs2_ready),
@@ -258,24 +243,16 @@ module cpu(
     .reg_send_index  (issue_to_reg_id),
     .send_RobId      (issue_send_RobId),
     .rs_send_enable  (issue_to_rs_valid),
-    .rs_send_op      (issue_to_rs_op),
-    .rs_send_Vj      (issue_to_rs_Vj),
-    .rs_send_Rj      (issue_to_rs_Rj),
-    .rs_send_Qj      (issue_to_rs_Qj),
-    .rs_send_Vk      (issue_to_rs_Vk),
-    .rs_send_Rk      (issue_to_rs_Rk),
-    .rs_send_Qk      (issue_to_rs_Qk),
-    .rs_send_Imm     (issue_to_rs_Imm),
-    .rs_send_CurPc   (issue_to_rs_CurPc),
-    .lsb_send_enable (issue_to_lsb_valid),
-    .lsb_send_op     (issue_to_lsb_op),
-    .lsb_send_Vj     (issue_to_lsb_Vj),
-    .lsb_send_Rj     (issue_to_lsb_Rj),
-    .lsb_send_Qj     (issue_to_lsb_Qj),
-    .lsb_send_Vk     (issue_to_lsb_Vk),
-    .lsb_send_Rk     (issue_to_lsb_Rk),
-    .lsb_send_Qk     (issue_to_lsb_Qk),
-    .lsb_send_Imm    (issue_to_lsb_Imm)
+    .op_type         (issue_op),
+    .Vj      (issue_Vj),
+    .Rj      (issue_Rj),
+    .Qj      (issue_Qj),
+    .Vk      (issue_Vk),
+    .Rk      (issue_Rk),
+    .Qk      (issue_Qk),
+    .imm     (issue_Imm),
+    .CurPc   (issue_CurPc),
+    .lsb_send_enable (issue_to_lsb_valid)
   );
   
   RS u_RS(
@@ -283,16 +260,16 @@ module cpu(
     .rst           (rst_in        ),
     .rdy           (rdy_in        ),
     .issue_valid   (issue_to_rs_valid),
-    .issue_op      (issue_to_rs_op),
-    .issue_Vj      (issue_to_rs_Vj),
-    .issue_Rj      (issue_to_rs_Rj),
-    .issue_Qj      (issue_to_rs_Qj),
-    .issue_Vk      (issue_to_rs_Vk),
-    .issue_Rk      (issue_to_rs_Rk),
-    .issue_Qk      (issue_to_rs_Qk),
-    .issue_Imm     (issue_to_rs_Imm),
+    .issue_op      (issue_op),
+    .issue_Vj      (issue_Vj),
+    .issue_Rj      (issue_Rj),
+    .issue_Qj      (issue_Qj),
+    .issue_Vk      (issue_Vk),
+    .issue_Rk      (issue_Rk),
+    .issue_Qk      (issue_Qk),
+    .issue_Imm     (issue_Imm),
     .issue_DestRob (issue_send_RobId),
-    .issue_CurPC   (issue_to_rs_CurPc),
+    .issue_CurPC   (issue_CurPc),
     .exc_valid     (fu_broadcast_valid),
     .exc_RobId     (fu_broadcast_RobId),
     .exc_value     (fu_broadcast_value),
@@ -314,9 +291,7 @@ module cpu(
   	.clk          (clk_in       ),
     .rst          (rst_in       ),
     .rdy          (rdy_in       ),
-    .rs1_valid    (issue_to_reg_rs1_valid),
     .rs1          (issue_to_reg_rs1_id),
-    .rs2_valid    (issue_to_reg_rs2_valid),
     .rs2          (issue_to_reg_rs2_id),
     .Vj_to_issue  (reg_to_issue_Vj),
     .Rj_to_issue  (reg_to_issue_Rj),
@@ -363,10 +338,8 @@ module cpu(
     .update_pred_need_jump (update_pred_need_jump),
     .lsb_begin_store (rob_to_lsb_valid),
     .lsb_store_RobId (rob_to_lsb_RobId),
-    .issue_query_rs1 (issue_to_rob_rs1_RobId),
-    .issue_query_rs1_valid (issue_to_rob_rs1_valid),
-    .issue_query_rs2 (issue_to_rob_rs2_RobId),
-    .issue_query_rs2_valid (issue_to_rob_rs2_valid),
+    .issue_query_rs1 (reg_to_issue_Qj),
+    .issue_query_rs2 (reg_to_issue_Qk),
     .rs1_ready       (rob_to_issue_rs1_ready),
     .rs1_value       (rob_to_issue_rs1_value),
     .rs2_ready       (rob_to_issue_rs2_ready),
@@ -383,14 +356,14 @@ module cpu(
     .jump_flag     (jump_flag     ),
     .rob_top_id    (rob_top_id    ),
     .issue_valid   (issue_to_lsb_valid),
-    .issue_op      (issue_to_lsb_op),
-    .issue_Vj      (issue_to_lsb_Vj),
-    .issue_Rj      (issue_to_lsb_Rj),
-    .issue_Qj      (issue_to_lsb_Qj),
-    .issue_Vk      (issue_to_lsb_Vk),
-    .issue_Rk      (issue_to_lsb_Rk),
-    .issue_Qk      (issue_to_lsb_Qk),
-    .issue_Imm     (issue_to_lsb_Imm),
+    .issue_op      (issue_op),
+    .issue_Vj      (issue_Vj),
+    .issue_Rj      (issue_Rj),
+    .issue_Qj      (issue_Qj),
+    .issue_Vk      (issue_Vk),
+    .issue_Rk      (issue_Rk),
+    .issue_Qk      (issue_Qk),
+    .issue_Imm     (issue_Imm),
     .issue_DestRob (issue_send_RobId),
     .rob_committed (rob_to_lsb_valid),
     .rob_RobId     (rob_to_lsb_RobId),
@@ -411,8 +384,6 @@ module cpu(
     .store_RobId   (lsb_to_rob_store_RobId),
     .LSB_next_full (lsb_next_full )
   );
-  
-
 endmodule
 
 `endif

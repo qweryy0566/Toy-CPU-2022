@@ -8,8 +8,8 @@ module InstFetch (
   input wire          rst,
   input wire					rdy,
 
-  output reg         pc_send_enable,
-  output reg [31:0]  pc_to_ic,
+  output wire        pc_send_enable,
+  output wire [31:0] pc_to_ic,
 
   input wire         inst_get_ready,  // hit
   input wire [31:0]  inst_from_ic,   // I-cache
@@ -35,10 +35,12 @@ module InstFetch (
   reg [1:0]  predCnt[`PRED_SIZE - 1:0];
   integer    i;
 
+  assign pc_to_ic = pc;
+  assign pc_send_enable = isBusy;
+
   always @(posedge clk) begin
     if (rst) begin
       isBusy <= `FALSE;
-      pc_send_enable <= `LOW;
       pc <= 0;
       inst_send_enable <= `LOW;
       inst_to_issue <= 0;
@@ -49,9 +51,7 @@ module InstFetch (
         predCnt[i << 2 | 3] <= 2'b00;
       end
     end else if (!rdy) begin
-      isBusy <= `FALSE;
-      pc_send_enable <= `LOW;
-      inst_send_enable <= `LOW;
+
     end else begin
       // Branch Prediction
       if (upd_pred_valid) begin
@@ -64,11 +64,8 @@ module InstFetch (
       if (jump_flag) begin
         pc <= target_pc;
         isBusy <= `FALSE;
-        pc_send_enable <= `LOW;
         inst_send_enable <= `LOW;
       end else if (rob_next_full || rs_next_full || lsb_next_full) begin
-        isBusy <= `FALSE;
-        pc_send_enable <= `LOW;
         inst_send_enable <= `LOW;
       end else begin
         if (isBusy) begin
@@ -84,15 +81,11 @@ module InstFetch (
               pc <= pc + 4;
               pred_to_issue <= `FALSE;
             end
-            pc_send_enable <= `LOW;
           end else begin
-            pc_send_enable <= `HIGH;
             inst_send_enable <= `LOW;
           end
         end else begin
           isBusy <= `TRUE;
-          pc_to_ic <= pc;
-          pc_send_enable <= `HIGH;
           inst_send_enable <= `LOW;
         end
       end

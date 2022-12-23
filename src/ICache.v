@@ -11,8 +11,8 @@ module ICache (
   input wire         if_valid,
   input wire [31:0]  pc_from_if,
 
-  output reg         inst_enable,  // hit
-  output reg [31:0]  inst_to_if,
+  output wire        inst_enable,  // hit
+  output wire [31:0] inst_to_if,
 
   output reg         addr_enable,
   output reg [31:0]  addr_to_mem,
@@ -27,11 +27,13 @@ module ICache (
   reg [31:0]   data  [`CacheEntries - 1:0];
 
   wire hit = valid[pc_from_if[9:2]] && tag[pc_from_if[9:2]] == pc_from_if[17:10];
+  assign inst_enable = if_valid && hit || mem_valid && addr_to_mem == pc_from_if;
+  assign inst_to_if  = hit ? data[pc_from_if[9:2]] : inst_from_mem;
 
   always @(posedge clk) begin
     if (rst) begin
       isBusy <= `FALSE;
-      inst_enable <= `LOW;
+      addr_enable <= `LOW;
       for (i = 0; i << 2 < `CacheEntries; i = i + 1) begin
         valid[i << 2] <= `FALSE;
         valid[i << 2 | 1] <= `FALSE;
@@ -41,33 +43,18 @@ module ICache (
     end else if (~rdy) begin
 
     end else begin
-      if (if_valid) begin
-        if (hit) begin
-          inst_enable <= `HIGH;
-          inst_to_if <= data[pc_from_if[9:2]];
-        end else begin
-          inst_enable <= `LOW;
-          if (isBusy) begin
-            if (mem_valid) begin
-              valid[pc_from_if[9:2]] <= `TRUE;
-              tag[pc_from_if[9:2]]   <= pc_from_if[17:10];
-              data[pc_from_if[9:2]]  <= inst_from_mem;
-              addr_enable <= `LOW;
-            end else begin
-              addr_enable <= `HIGH;
-              inst_enable <= `LOW;
-            end
-          end else begin
-            isBusy <= `TRUE;
-            addr_enable <= `HIGH;
-            addr_to_mem <= pc_from_if;
-            inst_enable <= `LOW;
-          end
+      if (isBusy) begin
+        if (mem_valid) begin
+          valid[addr_to_mem[9:2]] <= `TRUE;
+          tag[addr_to_mem[9:2]]   <= addr_to_mem[17:10];
+          data[addr_to_mem[9:2]]  <= inst_from_mem;
+          addr_enable <= `LOW;
+          isBusy <= `FALSE;
         end
-      end else begin
-        isBusy <= `FALSE;
-        inst_enable <= `LOW;
-        addr_enable <= `LOW;
+      end else if (if_valid && ~hit) begin
+        isBusy <= `TRUE;
+        addr_enable <= `HIGH;
+        addr_to_mem <= pc_from_if;
       end
     end
   end

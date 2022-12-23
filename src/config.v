@@ -1,7 +1,7 @@
-`define HIGH 1'b1;
-`define LOW 1'b0;
-`define TRUE 1'b1;
-`define FALSE 1'b0;
+`define HIGH 1'b1
+`define LOW 1'b0
+`define TRUE 1'b1
+`define FALSE 1'b0
 
 `define CacheEntries 256
 
@@ -44,14 +44,14 @@
 `define OP_LUI 6'd36
 `define OP_AUIPC 6'd37
 
-`define ROB_LOG 5
-`define ROB_SIZE 32
-`define RS_LOG 5
-`define RS_SIZE 32
+`define ROB_LOG 4
+`define ROB_SIZE 16
+`define RS_LOG 4
+`define RS_SIZE 16
 `define OP_LOG 6
 `define OP_SIZE 38
-`define LSB_LOG 5
-`define LSB_SIZE 32
+`define LSB_LOG 4
+`define LSB_SIZE 16
 
 `define STORE 1'b1
 `define LOAD 1'b0

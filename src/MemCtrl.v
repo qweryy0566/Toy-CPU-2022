@@ -25,9 +25,7 @@ module MemCtrl (
   input wire [2:0]  lsb_size,
   input wire        lsb_wr_tag,
   output reg        lsb_enable,
-  output reg [31:0] lsb_load_data,
-
-  input wire        jump_flag
+  output reg [31:0] lsb_load_data
 );
 
   reg [2:0] pos;

@@ -52,32 +52,14 @@ module RS (
   reg [`ROB_LOG - 1:0]  DestRob[`RS_SIZE - 1:0];
   reg [31:0]            CurPC[`RS_SIZE - 1:0];
 
-  // issue value should be updated from the broadcast value
-  wire [31:0]           real_Vj = exc_valid && exc_RobId == issue_Qj
-                                    ? exc_value
-                                    : LSB_valid && LSB_RobId == issue_Qj ? LSB_value : issue_Vj;
-  wire [31:0]           real_Vk = exc_valid && exc_RobId == issue_Qk
-                                    ? exc_value
-                                    : LSB_valid && LSB_RobId == issue_Qk ? LSB_value : issue_Vk;
-  wire                  real_Rj = exc_valid && exc_RobId == issue_Qj 
-                                    ? 1
-                                    : LSB_valid && LSB_RobId == issue_Qj ? 1 : issue_Rj; 
-  wire                  real_Rk = exc_valid && exc_RobId == issue_Qk 
-                                    ? 1
-                                    : LSB_valid && LSB_RobId == issue_Qk ? 1 : issue_Rk;
-  wire [`ROB_LOG - 1:0] real_Qj = exc_valid && exc_RobId == issue_Qj 
-                                    ? 0
-                                    : LSB_valid && LSB_RobId == issue_Qj ? 0 : issue_Qj;
-  wire [`ROB_LOG - 1:0] real_Qk = exc_valid && exc_RobId == issue_Qk 
-                                    ? 0
-                                    : LSB_valid && LSB_RobId == issue_Qk ? 0 : issue_Qk;
-
   reg     has_ready;
   integer i, j, cnt, empty_pos, ready_pos;
 
   always @(*) begin
     cnt = 0;
     has_ready = 0;
+    empty_pos = -1;
+    ready_pos = -1;
     for (j = 0; j < `RS_SIZE; j = j + 1)
       if (isBusy[j]) begin
         cnt = cnt + 1;
@@ -105,12 +87,12 @@ module RS (
       if (issue_valid) begin
         isBusy[empty_pos] <= 1;
         OpType[empty_pos] <= issue_op;
-        Vj[empty_pos] <= real_Vj;
-        Vk[empty_pos] <= real_Vk;
-        Rj[empty_pos] <= real_Rj;
-        Rk[empty_pos] <= real_Rk;
-        Qj[empty_pos] <= real_Qj;
-        Qk[empty_pos] <= real_Qk;
+        Vj[empty_pos] <= issue_Vj;
+        Vk[empty_pos] <= issue_Vk;
+        Rj[empty_pos] <= issue_Rj;
+        Rk[empty_pos] <= issue_Rk;
+        Qj[empty_pos] <= issue_Qj;
+        Qk[empty_pos] <= issue_Qk;
         Imm[empty_pos] <= issue_Imm;
         DestRob[empty_pos] <= issue_DestRob;
         CurPC[empty_pos] <= issue_CurPC;
