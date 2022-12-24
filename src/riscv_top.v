@@ -10,7 +10,13 @@ module riscv_top
 	input wire			btnC,
 	output wire 		Tx,
 	input wire 			Rx,
-	output wire			led
+	output wire			led,
+	output wire     L_io_buffer_full,
+	output wire     L_rob_next_full,
+	output wire     L_rs_next_full,
+	output wire     L_lsb_next_full,
+	output wire     L_jump_flag,
+	output wire     L_exc_valid
 );
 
 localparam SYS_CLK_FREQ = 100000000;
@@ -108,6 +114,11 @@ cpu cpu0(
 	.mem_wr(cpu_ram_wr),
 	
 	.io_buffer_full(hci_io_full),
+	.L_rob_next_full(L_rob_next_full),
+	.L_rs_next_full(L_rs_next_full),
+	.L_lsb_next_full(L_lsb_next_full),
+	.L_jump_flag(L_jump_flag),
+	.L_exc_valid(L_exc_valid),
 
 	.dbgreg_dout(cpu_dbgreg_dout)
 );
@@ -148,6 +159,7 @@ assign hci_active 	= hci_active_out & ~SIM;
 
 // indicates debug break
 assign led = hci_active;
+assign L_io_buffer_full = hci_io_full;
 
 // pause cpu on hci active
 assign cpu_rdy		= (hci_active) ? 1'b0			 : 1'b1;

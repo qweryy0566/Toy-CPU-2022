@@ -35,7 +35,7 @@ module ROB (
   output reg                  jump_flag,
   output reg [31:0]           if_toPC,
   output reg                  update_pred_enable,
-  output reg [31:0]           update_pred_pc,
+  output reg [`PRED_RANGE]    update_pred_index,
   output reg                  update_pred_need_jump,
 
   output reg                  lsb_begin_store,
@@ -75,8 +75,8 @@ module ROB (
   assign rob_top_id = top_id;
   assign rob_next = tail + 1 & `ROB_SIZE - 1;
   assign rob_next_full = tail >= head
-      ? tail - head + issue_valid - (~isEmpty && isReady[top_id]) >= `ROB_SIZE - 1
-      : tail + `ROB_SIZE - head + issue_valid - (~isEmpty && isReady[top_id]) >= `ROB_SIZE - 1;
+      ? tail - head + issue_valid - (rdy && ~isEmpty && isReady[top_id]) >= `ROB_SIZE - 1
+      : tail + `ROB_SIZE - head + issue_valid - (rdy && ~isEmpty && isReady[top_id]) >= `ROB_SIZE - 1;
 
   assign rs1_ready = isReady[issue_query_rs1];
   assign rs1_value = Value[issue_query_rs1];
@@ -130,7 +130,7 @@ module ROB (
         case (OpType[top_id])
           `OP_BEQ, `OP_BNE, `OP_BLT, `OP_BGE, `OP_BLTU, `OP_BGEU: begin
             update_pred_enable <= 1;
-            update_pred_pc <= CurPC[top_id];
+            update_pred_index <= CurPC[top_id][`PRED_RANGE];
             update_pred_need_jump <= Value[top_id] == 1;
             if (Value[top_id] == 1 ^ Pred[top_id]) begin
               jump_flag <= 1;

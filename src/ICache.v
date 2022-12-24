@@ -33,12 +33,8 @@ module ICache (
     if (rst) begin
       isBusy <= `FALSE;
       addr_enable <= `LOW;
-      for (i = 0; i << 2 < `CacheEntries; i = i + 1) begin
-        valid[i << 2] <= `FALSE;
-        valid[i << 2 | 1] <= `FALSE;
-        valid[i << 2 | 2] <= `FALSE;
-        valid[i << 2 | 3] <= `FALSE;
-      end
+      for (i = 0; i < `CacheEntries; i = i + 1)
+        valid[i] <= `FALSE;
     end else if (~rdy) begin
 
     end else begin

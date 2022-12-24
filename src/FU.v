@@ -102,7 +102,7 @@ module FU (
         `OP_ANDI:
           B_value = RS_Vj & RS_Imm;
         `OP_SLLI:
-          B_value = RS_Vj <<< RS_Imm[4:0];
+          B_value = RS_Vj << RS_Imm[4:0];
         `OP_SRLI:
           B_value = RS_Vj >> RS_Imm[4:0];
         `OP_SRAI:

@@ -62,3 +62,4 @@
 `define STATUS_STORE 2'b11
 
 `define PRED_SIZE 256
+`define PRED_RANGE 9:2

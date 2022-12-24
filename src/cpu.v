@@ -26,7 +26,12 @@ module cpu(
   output wire                 mem_wr,			// write/read signal (1 for write)
 	
 	input  wire                 io_buffer_full, // 1 if uart buffer is full
-	
+
+  output wire                 L_rob_next_full,
+  output wire                 L_rs_next_full,
+  output wire                 L_lsb_next_full,
+  output wire                 L_exc_valid,
+  output wire                 L_jump_flag,
 	output wire [31:0]			dbgreg_dout		// cpu register output (debugging demo)
 );
 
@@ -41,35 +46,32 @@ module cpu(
 // - 0x30000 write: write a byte to output (write 0x00 is ignored)
 // - 0x30004 read: read clocks passed since cpu starts (in dword, 4 bytes)
 // - 0x30004 write: indicates program stop (will output '\0' through uart tx)
-  wire           jump_flag;
-  wire           update_pred_valid;
-  wire [31:0]    update_pred_pc;
-  wire           update_pred_need_jump;
+  wire                  jump_flag;
+  wire                  update_pred_valid;
+  wire [`PRED_RANGE]    update_pred_index;
+  wire                  update_pred_need_jump;
 
-  wire           ic_to_mem_valid;
-  wire [31:0]    ic_to_mem_addr;
-  wire           mem_to_ic_valid;
-  wire [31:0]    mem_to_ic_inst;
-  wire [31:0]    if_to_ic_pc;
-  wire           ic_to_if_valid;
-  wire [31:0]    ic_to_if_inst;
-  wire           if_to_issue_valid;
-  wire [31:0]    if_to_issue_inst;
-  wire [31:0]    if_to_issue_pc;
-  wire           if_to_issue_pred;
-  wire [31:0]    rob_to_if_pc;
+  wire                  ic_to_mem_valid;
+  wire [31:0]           ic_to_mem_addr;
+  wire                  mem_to_ic_valid;
+  wire [31:0]           mem_to_ic_inst;
+  wire [31:0]           if_to_ic_pc;
+  wire                  ic_to_if_valid;
+  wire [31:0]           ic_to_if_inst;
+  wire                  if_to_issue_valid;
+  wire [4:0]            if_to_reg_rs1;
+  wire [4:0]            if_to_reg_rs2;
+  wire [31:0]           rob_to_if_pc;
 
-  wire           lsb_to_mem_valid;
-  wire [31:0]    lsb_to_mem_addr;
-  wire [31:0]    lsb_to_mem_store_data;
-  wire [2:0]     lsb_to_mem_size;
-  wire           lsb_to_mem_wr_tag;
-  wire           mem_to_lsb_valid;
-  wire [31:0]    mem_to_lsb_load_data;
+  wire                  lsb_to_mem_valid;
+  wire [31:0]           lsb_to_mem_addr;
+  wire [31:0]           lsb_to_mem_store_data;
+  wire [2:0]            lsb_to_mem_size;
+  wire                  lsb_to_mem_wr_tag;
+  wire                  mem_to_lsb_valid;
+  wire [31:0]           mem_to_lsb_load_data;
 
   wire [`ROB_LOG - 1:0] issue_send_RobId;
-  wire [4:0]            issue_to_reg_rs1_id;
-  wire [4:0]            issue_to_reg_rs2_id;
   wire                  rob_to_issue_rs1_ready;
   wire [31:0]           rob_to_issue_rs1_value;
   wire                  rob_to_issue_rs2_ready;
@@ -81,14 +83,11 @@ module cpu(
   wire [`ROB_LOG - 1:0] reg_to_issue_Qj;
   wire [`ROB_LOG - 1:0] reg_to_issue_Qk;
   wire                  issue_to_rob_valid;
-  wire [`OP_LOG - 1:0]  issue_to_rob_op;
-  wire [4:0]            issue_to_rob_dest;
-  wire [31:0]           issue_to_rob_pc;
   wire                  issue_to_rob_pred;
   wire                  issue_to_reg_valid;
-  wire [4:0]            issue_to_reg_id;
   wire                  issue_to_rs_valid;
   wire [`OP_LOG - 1:0]  issue_op;
+  wire [4:0]            issue_rd;
   wire [31:0]           issue_Vj; 
   wire [31:0]           issue_Vk;
   wire                  issue_Rj;
@@ -131,6 +130,12 @@ module cpu(
   wire                  rs_next_full;
   wire                  lsb_next_full;
 
+  // personal use
+  assign L_rob_next_full = rob_next_full;
+  assign L_rs_next_full = rs_next_full;
+  assign L_lsb_next_full = lsb_next_full;
+  assign L_exc_valid = fu_broadcast_valid;
+  assign L_jump_flag = jump_flag;
 
   MemCtrl u_MemCtrl(
   	.clk            (clk_in         ),
@@ -175,16 +180,20 @@ module cpu(
     .inst_get_ready   (ic_to_if_valid),
     .inst_from_ic     (ic_to_if_inst),
     .inst_send_enable (if_to_issue_valid),
-    .inst_to_issue    (if_to_issue_inst),
-    .pc_to_issue      (if_to_issue_pc),
-    .pred_to_issue    (if_to_issue_pred),
+    .op_type_to_issue (issue_op),
+    .rd_to_issue      (issue_rd),
+    .rs1_to_reg       (if_to_reg_rs1),
+    .rs2_to_reg       (if_to_reg_rs2),
+    .imm_to_issue     (issue_Imm),
+    .pc_to_issue      (issue_CurPc),
+    .pred_to_issue    (issue_to_rob_pred),
     .jump_flag        (jump_flag        ),
     .target_pc        (rob_to_if_pc),
     .rob_next_full    (rob_next_full),
     .rs_next_full     (rs_next_full),
     .lsb_next_full    (lsb_next_full),
     .upd_pred_valid   (update_pred_valid),
-    .upd_pred_pc      (update_pred_pc),
+    .upd_pred_index    (update_pred_index),
     .upd_pred_need_jump(update_pred_need_jump)
   );
 
@@ -208,17 +217,13 @@ module cpu(
     .rst             (rst_in),
     .rdy             (rdy_in),
     .inst_valid      (if_to_issue_valid),
-    .inst_from_if    (if_to_issue_inst),
-    .pc_from_if      (if_to_issue_pc),
-    .pred_from_if    (if_to_issue_pred),
+    .op_type_from_if (issue_op),
     .exc_valid      (fu_broadcast_valid),
     .exc_value      (fu_broadcast_value),
     .exc_RobId      (fu_broadcast_RobId),
     .LSB_valid      (lsb_broadcast_valid),
     .LSB_value      (lsb_broadcast_value),
     .LSB_RobId      (lsb_broadcast_RobId),
-    .rs1_to_reg      (issue_to_reg_rs1_id),
-    .rs2_to_reg      (issue_to_reg_rs2_id),
     .rob_rs1_ready   (rob_to_issue_rs1_ready),
     .rob_rs1_value   (rob_to_issue_rs1_value),
     .rob_rs2_ready   (rob_to_issue_rs2_ready),
@@ -231,23 +236,15 @@ module cpu(
     .Qk_from_reg     (reg_to_issue_Qk),
     .rob_next        (rob_next        ),
     .rob_send_enable (issue_to_rob_valid),
-    .rob_send_op     (issue_to_rob_op),
-    .rob_send_dest   (issue_to_rob_dest),
-    .rob_send_pc     (issue_to_rob_pc),
-    .rob_send_pred   (issue_to_rob_pred),
     .reg_send_enable (issue_to_reg_valid),
-    .reg_send_index  (issue_to_reg_id),
     .send_RobId      (issue_send_RobId),
     .rs_send_enable  (issue_to_rs_valid),
-    .op_type         (issue_op),
     .Vj      (issue_Vj),
     .Rj      (issue_Rj),
     .Qj      (issue_Qj),
     .Vk      (issue_Vk),
     .Rk      (issue_Rk),
     .Qk      (issue_Qk),
-    .imm     (issue_Imm),
-    .CurPc   (issue_CurPc),
     .lsb_send_enable (issue_to_lsb_valid)
   );
   
@@ -287,8 +284,8 @@ module cpu(
   	.clk          (clk_in       ),
     .rst          (rst_in       ),
     .rdy          (rdy_in       ),
-    .rs1          (issue_to_reg_rs1_id),
-    .rs2          (issue_to_reg_rs2_id),
+    .rs1          (if_to_reg_rs1),
+    .rs2          (if_to_reg_rs2),
     .Vj_to_issue  (reg_to_issue_Vj),
     .Rj_to_issue  (reg_to_issue_Rj),
     .Qj_to_issue  (reg_to_issue_Qj),
@@ -300,7 +297,7 @@ module cpu(
     .commit_value (rob_to_reg_value),
     .commit_RobId (rob_to_reg_RobId),
     .rename_valid (issue_to_reg_valid),
-    .issue_rd     (issue_to_reg_id),
+    .issue_rd     (issue_rd),
     .issue_RobId  (issue_send_RobId),
     .jump_flag    (jump_flag    )
   );
@@ -310,9 +307,9 @@ module cpu(
     .rst             (rst_in          ),
     .rdy             (rdy_in          ),
     .issue_valid     (issue_to_rob_valid),
-    .issue_op        (issue_to_rob_op),
-    .issue_dest      (issue_to_rob_dest),
-    .issue_pc        (issue_to_rob_pc),
+    .issue_op        (issue_op),
+    .issue_dest      (issue_rd),
+    .issue_pc        (issue_CurPc),
     .issue_pred      (issue_to_rob_pred),
     .exc_valid       (fu_broadcast_valid),
     .exc_value       (fu_broadcast_value),
@@ -329,8 +326,8 @@ module cpu(
     .reg_value       (rob_to_reg_value),
     .jump_flag       (jump_flag       ),
     .if_toPC         (rob_to_if_pc),
-    .update_pred_enable (update_pred_valid),
-    .update_pred_pc  (update_pred_pc),
+    .update_pred_enable    (update_pred_valid),
+    .update_pred_index     (update_pred_index),
     .update_pred_need_jump (update_pred_need_jump),
     .lsb_begin_store (rob_to_lsb_valid),
     .lsb_store_RobId (rob_to_lsb_RobId),

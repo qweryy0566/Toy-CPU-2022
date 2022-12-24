@@ -74,8 +74,8 @@ module LSBuffer (
 
   assign isEmpty = head == tail;
   assign LSB_next_full = tail >= head
-      ? tail - head + issue_valid - (isWaitingMem && mem_success) >= `LSB_SIZE - 1
-      : tail + `LSB_SIZE - head + issue_valid  - (isWaitingMem && mem_success) >= `LSB_SIZE - 1;
+      ? tail - head + issue_valid - (rdy && isWaitingMem && mem_success) >= `LSB_SIZE - 1
+      : tail + `LSB_SIZE - head + issue_valid  - (rdy && isWaitingMem && mem_success) >= `LSB_SIZE - 1;
 
   always @(posedge clk) begin
     B_enable <= `FALSE;

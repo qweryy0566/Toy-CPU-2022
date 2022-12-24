@@ -31,9 +31,9 @@ module RegFile (
 
 );
 
-  reg [31:0] regFile [31:0];
+  reg [31:0]           regFile [31:0];
   reg [`ROB_LOG - 1:0] reorder[31:0];
-  reg        isReorder[31:0]; // 超级大 bug, 原来是直接用 reorder != 0 来判断是否重命名.
+  reg                  isReorder[31:0]; // 超级大 bug, 原来是直接用 reorder != 0 来判断是否重命名.
   integer i;
 
   assign Vj_to_issue = isReorder[rs1] && commit_valid && commit_RobId == reorder[rs1] ? commit_value : regFile[rs1];

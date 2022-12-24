@@ -18,9 +18,33 @@
 
 ## 运行效率
 
-`heart.c` 需要 1968 s，还在寻找原因中。
+~~`heart.c` 需要 1968 s，还在寻找原因中。~~需要注意 Branch Predictor 的实现。
 
-上板频率 100 MHz，WNS = 0.201 ns。
+上板频率 100 MHz，WNS = -0.721 ns。
+
+| 测试点名称     | 运行时间（s) |
+| -------------- | ------------ |
+| array_test1    | 0.018041     |
+| array_test2    | 0.007438     |
+| basicopt1      | 0.018451     |
+| bulgarian      | 1.731970     |
+| expr           | 0.009880     |
+| gcd            | 0.006399     |
+| hanoi          | 3.545234     |
+| heart          | 586.205736   |
+| looper         | 2.008588     |
+| lvalue2        | 0.014634     |
+| magic          | 0.033122     |
+| manyarguments  | 0.016577     |
+| multiarray     | 0.017369     |
+| pi             | 1.608805     |
+| qsort          | 6.536273     |
+| queens         | 3.126208     |
+| statement_test | 0.004048     |
+| superloop      | 0.014961     |
+| tak            | 0.072251     |
+| testsleep      | 6.888745     |
+| uartboom       | 0.784658     |
 
 ## 难调的 bug
 
