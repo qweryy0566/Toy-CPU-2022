@@ -19,7 +19,8 @@
 ## 运行效率
 
 目前版本问题：`testsleep.c` 睡的时长偏小，且 `sleep(2000)` 时实际睡眠 clk 不足 1.9 s。
-上一版本问题：睡眠正常但运行时间过慢（`heart.c` 1968 s）。问题不在 Branch Predictor 而在于以下 Warning：
+
+上一版本问题：睡眠正常但运行时间过慢（`heart.c` 1968 s）。经严格控制变量后发现问题不在 Branch Predictor 而在于以下 Warning：
 
 ```
 WARNING: [Synth 8-4767] Trying to implement RAM 'valid_reg' in registers. Block RAM or DRAM implementation is not possible; see log for reasons.
