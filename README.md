@@ -18,7 +18,21 @@
 
 ## 运行效率
 
-~~`heart.c` 需要 1968 s，还在寻找原因中。~~需要注意 Branch Predictor 的实现。
+目前版本问题：`testsleep.c` 睡的时长偏小，且 `sleep(2000)` 时实际睡眠 clk 不足 1.9 s。
+上一版本问题：睡眠正常但运行时间过慢（`heart.c` 1968 s）。问题不在 Branch Predictor 而在于以下 Warning：
+
+```
+WARNING: [Synth 8-4767] Trying to implement RAM 'valid_reg' in registers. Block RAM or DRAM implementation is not possible; see log for reasons.
+Reason is one or more of the following :
+	1: Invalid write to RAM. 
+	2: Unable to determine number of words or word size in RAM. 
+	3: No valid read/write found for RAM. 
+RAM "valid_reg" dissolved into registers
+```
+
+产生该 Warning 是因为某种不规范的初始化方式。
+
+------
 
 上板频率 100 MHz，WNS = -0.721 ns。
 
@@ -43,7 +57,7 @@
 | statement_test | 0.004048     |
 | superloop      | 0.014961     |
 | tak            | 0.072251     |
-| testsleep      | 6.888745     |
+| testsleep      | 10.008813    |
 | uartboom       | 0.784658     |
 
 ## 难调的 bug
