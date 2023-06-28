@@ -63,7 +63,7 @@ RAM "valid_reg" dissolved into registers
 
 ## 难调的 bug
 
-> To Do
+懒得整理了，见[草稿](attach/cpu_draft.pdf)。
 
 ## WSL2 上板指引
 
@@ -87,7 +87,7 @@ RAM "valid_reg" dissolved into registers
     usbipd wsl list
     ```
 
-    ![img1](img/fig1.png)
+    ![img1](attach/fig1.png)
 
 2. 找到 FPGA 板（设备名称应该是 `USB Serial Converter A, USB Serial Converter B`）的 bus ID，然后执行
 
@@ -95,7 +95,7 @@ RAM "valid_reg" dissolved into registers
     usbipd wsl attach --busid <busid>
     ```
 
-    ![img2](img/fig2.png)
+    ![img2](attach/fig2.png)
 
 3. 在 **WSL** 中，可以使用以下命令确认是否连接成功。
 
@@ -103,7 +103,7 @@ RAM "valid_reg" dissolved into registers
     lsusb
     ```
 
-    ![img3](img/fig3.png)
+    ![img3](attach/fig3.png)
 
 ### 修改 `run_test_fpga.sh` 的端口
 
