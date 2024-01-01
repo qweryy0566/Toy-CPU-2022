@@ -68,6 +68,8 @@ RAM "valid_reg" dissolved into registers
 ## WSL2 上板指引
 
 > Microsoft 官方文档：https://learn.microsoft.com/zh-cn/windows/wsl/connect-usb
+>
+> upd on 1/1/2024: USBIPD-WIN 工具的命令格式有更新，见工具仓库 [readme](https://github.com/dorssel/usbipd-win)。
 
 ### 预备
 
@@ -87,6 +89,12 @@ RAM "valid_reg" dissolved into registers
     usbipd wsl list
     ```
 
+    > upd on 1/1/2024: 目前 USBIPD 版本下对应命令均需去掉 `wsl`，即
+    >
+    > ```powershell
+    > upbipd list
+    > ```
+
     ![img1](attach/fig1.png)
 
 2. 找到 FPGA 板（设备名称应该是 `USB Serial Converter A, USB Serial Converter B`）的 bus ID，然后执行
@@ -94,6 +102,18 @@ RAM "valid_reg" dissolved into registers
     ```powershell
     usbipd wsl attach --busid <busid>
     ```
+
+    > upd on 1/1/2024: 目前 USBIPD 版本下首次 attach 前需要先执行
+    >
+    > ```powershell
+    > usbipd bind --busid <busid>
+    > ```
+    >
+    > 之后 attach 无需再次 bind。且目前版本下 attach 后需要带上参数 `--wsl`，即
+    >
+    > ```powershell
+    > usbipd attach --busid <busid> --wsl
+    > ```
 
     ![img2](attach/fig2.png)
 
@@ -131,5 +151,11 @@ RAM "valid_reg" dissolved into registers
 ```powershell
 usbipd wsl detach --busid <busid>
 ```
+
+> upd on 1/1/2024: 目前 USBIPD 版本下对应命令均需去掉 `wsl`，即
+>
+> ```powershell
+> usbipd detach --busid <busid>
+> ```
 
 以断开该设备与 WSL 的连接，然后你可以使用 Vivado 对其重新编程。当你准备好再次测试时，重复上述连接步骤即可。
